@@ -1,0 +1,532 @@
+---
+// 入力フォームコンポーネント
+---
+
+<div class="form-container">
+  <!-- 地域選択セクション -->
+  <section class="form-section" aria-labelledby="heading-region">
+    <div class="section-header">
+      <span class="step-badge">1</span>
+      <h2 id="heading-region" class="section-title">お住まいの地域</h2>
+    </div>
+    <p class="section-desc">お住まいの自治体を選択してください。各市区町村ごとの級地および住宅扶助特別基準額（上限）が自動適用されます。</p>
+    
+    <div class="grid-2">
+      <div class="form-group">
+        <label for="pref-select" class="form-label">都道府県 <span class="required-badge">必須</span></label>
+        <select id="pref-select" class="form-select" aria-required="true">
+          <option value="13" selected>東京都</option>
+          <option value="14">神奈川県</option>
+          <option value="27">大阪府</option>
+          <option value="23">愛知県</option>
+          <option value="40">福岡県</option>
+          <option value="01">北海道</option>
+          <option value="04">宮城県</option>
+          <option value="28">兵庫県</option>
+          <option value="26">京都府</option>
+          <option value="11">埼玉県</option>
+          <option value="12">千葉県</option>
+          <option value="02">青森県</option>
+          <option value="03">岩手県</option>
+          <option value="05">秋田県</option>
+          <option value="06">山形県</option>
+          <option value="07">福島県</option>
+          <option value="08">茨城県</option>
+          <option value="09">栃木県</option>
+          <option value="10">群馬県</option>
+          <option value="15">新潟県</option>
+          <option value="16">富山県</option>
+          <option value="17">石川県</option>
+          <option value="18">福井県</option>
+          <option value="19">山梨県</option>
+          <option value="20">長野県</option>
+          <option value="21">岐阜県</option>
+          <option value="22">静岡県</option>
+          <option value="24">三重県</option>
+          <option value="25">滋賀県</option>
+          <option value="29">奈良県</option>
+          <option value="30">和歌山県</option>
+          <option value="31">鳥取県</option>
+          <option value="32">島根県</option>
+          <option value="33">岡山県</option>
+          <option value="34">広島県</option>
+          <option value="35">山口県</option>
+          <option value="36">徳島県</option>
+          <option value="37">香川県</option>
+          <option value="38">愛媛県</option>
+          <option value="39">高知県</option>
+          <option value="41">佐賀県</option>
+          <option value="42">長崎県</option>
+          <option value="43">熊本県</option>
+          <option value="44">大分県</option>
+          <option value="45">宮崎県</option>
+          <option value="46">鹿児島県</option>
+          <option value="47">沖縄県</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="muni-select" class="form-label">市区町村 <span class="required-badge">必須</span></label>
+        <select id="muni-select" class="form-select" aria-required="true">
+          <!-- JSで動的生成 -->
+        </select>
+      </div>
+    </div>
+
+    <div class="grade-badge-container">
+      <span class="info-label">適用級地:</span>
+      <span id="current-grade-badge" class="badge-grade">1級地-1</span>
+      <span class="info-label ml-sm">冬季加算地域:</span>
+      <span id="current-winter-zone-badge" class="badge-sub">VI区</span>
+    </div>
+  </section>
+
+  <!-- 世帯構成セクション -->
+  <section class="form-section" aria-labelledby="heading-members">
+    <div class="section-header">
+      <span class="step-badge">2</span>
+      <h2 id="heading-members" class="section-title">世帯構成・障害手帳の有無</h2>
+    </div>
+    <p class="section-desc">世帯員全員の年齢と、お持ちの障害者手帳・年金等級を選択してください。</p>
+
+    <div id="members-list" class="members-list" role="list">
+      <!-- JSでメンバーカードを生成 -->
+    </div>
+
+    <div class="add-member-wrapper">
+      <button type="button" id="btn-add-member" class="btn-secondary">
+        <span class="btn-icon">+</span> 世帯員を追加する
+      </button>
+    </div>
+
+    <div class="single-parent-box">
+      <label class="checkbox-container">
+        <input type="checkbox" id="is-single-parent" class="custom-checkbox" />
+        <span class="checkbox-label-text">ひとり親世帯（母子世帯・父子世帯）に該当する</span>
+      </label>
+      <p class="checkbox-note">※18歳以下の子と同居している場合に「母子加算」が適用されます。</p>
+    </div>
+  </section>
+
+  <!-- 住まい・家賃・共益費セクション -->
+  <section class="form-section" aria-labelledby="heading-housing">
+    <div class="section-header">
+      <span class="step-badge">3</span>
+      <h2 id="heading-housing" class="section-title">住まい・家賃と共益費（管理費）</h2>
+    </div>
+    
+    <div class="housing-rule-notice">
+      <div class="notice-header">
+        <span class="notice-icon">💡</span>
+        <strong>生活保護における家賃と共益費・管理費のルール</strong>
+      </div>
+      <ul class="notice-list">
+        <li><strong>原則（共益費別払い）</strong>: 「住宅扶助」の対象は純粋な家賃のみです。共益費や管理費は支給対象外となり、日々の食費等の「生活扶助」から自己負担する必要があります。</li>
+        <li><strong>例外（共益費込契約）</strong>: 契約書上、共益費が家賃と区分されず「家賃（共益費込）」とされている場合は、その合計額が地域の上限額以内であれば全額が住宅扶助として支給されます。</li>
+      </ul>
+    </div>
+
+    <!-- 契約タイプの選択 -->
+    <div class="form-group mb-md">
+      <span class="form-label">共益費・管理費の契約形態 <span class="required-badge">必須</span></span>
+      <div class="radio-tile-group">
+        <label class="radio-tile">
+          <input type="radio" name="fee-payment-type" value="separate" checked class="radio-input" />
+          <div class="radio-content">
+            <span class="radio-title">家賃と別に支払っている（原則）</span>
+            <span class="radio-desc">賃貸契約書で家賃と共益費が分かれている場合</span>
+          </div>
+        </label>
+        <label class="radio-tile">
+          <input type="radio" name="fee-payment-type" value="included" class="radio-input" />
+          <div class="radio-content">
+            <span class="radio-title">家賃に含まれている（共益費込契約）</span>
+            <span class="radio-desc">共益費・管理費が0円、または家賃に込みの場合</span>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="form-group">
+        <label for="pure-rent-input" class="form-label" id="label-rent">
+          月額の家賃（純賃料）
+        </label>
+        <div class="input-with-unit">
+          <input
+            type="number"
+            id="pure-rent-input"
+            class="form-input text-right"
+            placeholder="未入力時は上限額を表示"
+            min="0"
+            max="500000"
+            step="1000"
+          />
+          <span class="input-unit">円 / 月</span>
+        </div>
+        <p class="input-hint" id="hint-rent">※共益費・管理費を除いた賃料本体を入力してください。</p>
+      </div>
+
+      <div class="form-group" id="group-common-fee">
+        <label for="common-fee-input" class="form-label">
+          月額の共益費・管理費
+        </label>
+        <div class="input-with-unit">
+          <input
+            type="number"
+            id="common-fee-input"
+            class="form-input text-right"
+            placeholder="例: 3000"
+            min="0"
+            max="50000"
+            step="500"
+          />
+          <span class="input-unit">円 / 月</span>
+        </div>
+        <p class="input-hint">※住宅扶助からは支給されず、生活費から自己負担となります。</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<style>
+  .form-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .form-section {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .step-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background-color: #1d4ed8;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 0.875rem;
+  }
+
+  .section-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+  }
+
+  .section-desc {
+    font-size: 0.875rem;
+    color: #475569;
+    margin: 0 0 1rem 0;
+    line-height: 1.5;
+  }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .grid-2 {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+
+  .mb-md {
+    margin-bottom: 1.25rem;
+  }
+
+  .form-label {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .required-badge {
+    font-size: 0.6875rem;
+    background-color: #fee2e2;
+    color: #b91c1c;
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
+    font-weight: 700;
+  }
+
+  .form-select,
+  .form-input {
+    width: 100%;
+    min-height: 44px;
+    padding: 0.625rem 0.875rem;
+    font-size: 1rem;
+    color: #1e293b;
+    background-color: #f8fafc;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 0.5rem;
+    box-sizing: border-box;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+  }
+
+  .form-select:focus,
+  .form-input:focus {
+    outline: none;
+    border-color: #1d4ed8;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.15);
+  }
+
+  .form-input:disabled {
+    background-color: #e2e8f0;
+    color: #94a3b8;
+    cursor: not-allowed;
+    border-color: #cbd5e1;
+  }
+
+  .text-right {
+    text-align: right;
+  }
+
+  .input-with-unit {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .input-with-unit .form-input {
+    padding-right: 4.5rem;
+  }
+
+  .input-unit {
+    position: absolute;
+    right: 0.875rem;
+    color: #64748b;
+    font-size: 0.875rem;
+    pointer-events: none;
+  }
+
+  .input-hint {
+    font-size: 0.8125rem;
+    color: #64748b;
+    margin: 0.25rem 0 0 0;
+    line-height: 1.4;
+  }
+
+  .grade-badge-container {
+    margin-top: 1rem;
+    padding: 0.625rem 0.875rem;
+    background-color: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  .info-label {
+    color: #1e3a8a;
+    font-weight: 600;
+  }
+
+  .ml-sm {
+    margin-left: 0.75rem;
+  }
+
+  .badge-grade {
+    background-color: #1d4ed8;
+    color: #ffffff;
+    font-weight: 700;
+    padding: 0.125rem 0.5rem;
+    border-radius: 0.25rem;
+  }
+
+  .badge-sub {
+    background-color: #3b82f6;
+    color: #ffffff;
+    font-weight: 600;
+    padding: 0.125rem 0.5rem;
+    border-radius: 0.25rem;
+  }
+
+  .members-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+    margin-bottom: 1rem;
+  }
+
+  .add-member-wrapper {
+    margin-top: 0.5rem;
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0.5rem 1.25rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: #1d4ed8;
+    background-color: #eff6ff;
+    border: 1.5px solid #bfdbfe;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+  }
+
+  .btn-secondary:hover {
+    background-color: #dbeafe;
+    border-color: #93c5fd;
+  }
+
+  .btn-icon {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-right: 0.375rem;
+    line-height: 1;
+  }
+
+  .single-parent-box {
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px dashed #cbd5e1;
+  }
+
+  .checkbox-container {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    gap: 0.625rem;
+    cursor: pointer;
+  }
+
+  .custom-checkbox {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: #1d4ed8;
+  }
+
+  .checkbox-label-text {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: #1e293b;
+  }
+
+  .checkbox-note {
+    font-size: 0.8125rem;
+    color: #64748b;
+    margin: 0.25rem 0 0 1.875rem;
+  }
+
+  /* 共益費ルール注記 */
+  .housing-rule-notice {
+    background-color: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 0.5rem;
+    padding: 0.875rem 1rem;
+    margin-bottom: 1.25rem;
+    font-size: 0.8125rem;
+    color: #92400e;
+  }
+
+  .notice-header {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.875rem;
+    margin-bottom: 0.375rem;
+  }
+
+  .notice-list {
+    margin: 0;
+    padding-left: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    line-height: 1.5;
+  }
+
+  /* ラジオタイルのスタイル */
+  .radio-tile-group {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    margin-top: 0.25rem;
+  }
+
+  @media (min-width: 640px) {
+    .radio-tile-group {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .radio-tile {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.875rem;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 0.5rem;
+    background-color: #f8fafc;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .radio-tile:hover {
+    border-color: #93c5fd;
+    background-color: #eff6ff;
+  }
+
+  .radio-input {
+    width: 20px;
+    height: 20px;
+    margin-top: 0.125rem;
+    accent-color: #1d4ed8;
+  }
+
+  .radio-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+  }
+
+  .radio-title {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #1e293b;
+  }
+
+  .radio-desc {
+    font-size: 0.75rem;
+    color: #64748b;
+    line-height: 1.3;
+  }
+</style>

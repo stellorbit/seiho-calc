@@ -1,0 +1,867 @@
+---
+import CalculatorForm from '../components/CalculatorForm.astro';
+import ResultBreakdown from '../components/ResultBreakdown.astro';
+---
+
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content="生活保護費（生活扶助＋住宅扶助＋各種加算）の受給見込額を即時試算するシミュレーター。令和8年（2026年）10月改正基準対応・完全クライアントサイド演算でプライバシーを完全保護。" />
+    <title>生活保護受給額シミュレーター（令和8年10月改正基準・全国詳細市町村対応）</title>
+    <!-- Google Fonts: BIZ UDPGothic -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&display=swap" rel="stylesheet" />
+    <style is:global>
+      :root {
+        --color-bg: #f8fafc;
+        --color-card: #ffffff;
+        --color-text-main: #1e293b;
+        --color-text-muted: #64748b;
+        --color-primary: #1d4ed8;
+        --color-primary-hover: #1e40af;
+        --color-primary-light: #eff6ff;
+        --color-border: #cbd5e1;
+        --font-family-ud: 'BIZ UDPGothic', 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: var(--color-bg);
+        color: var(--color-text-main);
+        font-family: var(--font-family-ud);
+        font-size: 16px;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+        padding-bottom: 90px; /* 下部追従バー分の余白 */
+      }
+
+      .container {
+        width: 100%;
+        max-width: 1024px;
+        margin: 0 auto;
+        padding: 1rem;
+      }
+
+      @media (min-width: 640px) {
+        .container {
+          padding: 2rem 1.5rem;
+        }
+      }
+
+      header {
+        margin-bottom: 2rem;
+        text-align: center;
+      }
+
+      .header-badge {
+        display: inline-block;
+        background-color: #dbeafe;
+        color: #1e40af;
+        font-size: 0.8125rem;
+        font-weight: 700;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        margin-bottom: 0.5rem;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 0.5rem 0;
+        line-height: 1.3;
+      }
+
+      @media (min-width: 640px) {
+        h1 {
+          font-size: 2rem;
+        }
+      }
+
+      .header-desc {
+        font-size: 0.9375rem;
+        color: var(--color-text-muted);
+        max-width: 680px;
+        margin: 0 auto;
+      }
+
+      .privacy-notice-box {
+        margin-top: 1rem;
+        padding: 0.75rem 1rem;
+        background-color: #ecfdf5;
+        border: 1px solid #a7f3d0;
+        border-radius: 0.5rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.8125rem;
+        color: #065f46;
+      }
+
+      .privacy-icon {
+        font-size: 1rem;
+      }
+
+      .main-layout {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+
+      @media (min-width: 900px) {
+        .main-layout {
+          grid-template-columns: 1.15fr 0.85fr;
+          align-items: start;
+        }
+      }
+
+      /* メンバーカード動的生成用スタイル */
+      .member-card {
+        background-color: #f8fafc;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 0.5rem;
+        padding: 0.875rem;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .member-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .member-tag {
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: #1e3a8a;
+      }
+
+      .btn-remove-member {
+        min-width: 44px;
+        min-height: 44px;
+        padding: 0.25rem 0.625rem;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: #dc2626;
+        background-color: transparent;
+        border: 1px solid #fca5a5;
+        border-radius: 0.375rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.15s ease;
+      }
+
+      .btn-remove-member:hover {
+        background-color: #fee2e2;
+      }
+
+      .member-controls {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+      }
+
+      @media (min-width: 600px) {
+        .member-controls {
+          grid-template-columns: 110px 1fr;
+        }
+      }
+
+      /* フッター＆免責事項 */
+      footer {
+        margin-top: 3rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e2e8f0;
+        font-size: 0.8125rem;
+        color: var(--color-text-muted);
+        line-height: 1.6;
+      }
+
+      .disclaimer-card {
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .disclaimer-title {
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0 0 0.5rem 0;
+      }
+
+      .disclaimer-list {
+        margin: 0;
+        padding-left: 1.25rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      .copyright {
+        text-align: center;
+        font-size: 0.75rem;
+      }
+
+      /* 下部追従サマリーバー */
+      .bottom-sticky-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: #0f172a;
+        color: #ffffff;
+        border-top: 2px solid #1d4ed8;
+        padding: 0.625rem 1rem;
+        box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        max-height: 72px;
+      }
+
+      .sticky-content {
+        max-width: 1024px;
+        margin: 0 auto;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .sticky-label-group {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .sticky-title {
+        font-size: 0.75rem;
+        color: #94a3b8;
+      }
+
+      .sticky-sub {
+        font-size: 0.6875rem;
+        color: #64748b;
+      }
+
+      .sticky-amounts-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+      }
+
+      .sticky-amount-group {
+        display: flex;
+        align-items: baseline;
+        gap: 0.125rem;
+      }
+
+      .sticky-currency {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: #60a5fa;
+      }
+
+      .sticky-amount {
+        font-size: 1.625rem;
+        font-weight: 800;
+        font-variant-numeric: tabular-nums;
+        color: #ffffff;
+        line-height: 1;
+      }
+
+      .sticky-unit {
+        font-size: 0.75rem;
+        color: #94a3b8;
+      }
+
+      .sticky-effective-group {
+        display: none;
+      }
+
+      @media (min-width: 500px) {
+        .sticky-effective-group {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+        }
+        .sticky-effective-label {
+          font-size: 0.6875rem;
+          color: #94a3b8;
+        }
+        .sticky-effective-val {
+          font-size: 1.125rem;
+          font-weight: 700;
+          color: #38bdf8;
+          font-variant-numeric: tabular-nums;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <div class="header-badge">令和8年10月1日施行 改正基準対応</div>
+        <h1>生活保護受給額シミュレーター</h1>
+        <p class="header-desc">
+          全国自治体の最新級地・住宅扶助上限額、詳細な障害者手帳区分、共益費・管理費のルールに対応した即時受給試算ツールです。
+        </p>
+        <div class="privacy-notice-box" role="status">
+          <span class="privacy-icon">🔒</span>
+          <span><strong>プライバシー完全保護</strong>: 入力内容は端末のブラウザ内でのみ計算され、外部サーバーへの送信・保存は一切行われません。</span>
+        </div>
+      </header>
+
+      <main class="main-layout">
+        <!-- 入力フォームエリア -->
+        <div class="column-left">
+          <CalculatorForm />
+        </div>
+
+        <!-- 試算結果エリア -->
+        <div class="column-right">
+          <ResultBreakdown />
+        </div>
+      </main>
+
+      <footer>
+        <div class="disclaimer-card">
+          <h4 class="disclaimer-title">ご利用上の注意・免責事項</h4>
+          <ul class="disclaimer-list">
+            <li>本シミュレーターによる試算結果は、令和8年厚生労働省告示第245号（改正生活保護基準）に基づく概算試算値です。</li>
+            <li>実際の生活保護費の受給可否および支給決定額は、お住まいの自治体を管轄する福祉事務所（生活援護課等）による調査・認定によって最終決定されます。</li>
+            <li>共益費・管理費は原則として住宅扶助の対象外（生活費負担）ですが、契約上不可分で家賃に含まれている場合等の個別判断は福祉事務所にご相談ください。</li>
+            <li>給与収入や年金収入等がある場合は、基礎控除等を差し引いた額が保護費から控除（収入認定）されます。</li>
+            <li>本ツールは完全クライアントサイド演算（Zero-Data Retention）で動作しており、入力された個人情報がインターネット経由で送信・保存されることはありません。</li>
+          </ul>
+        </div>
+        <div class="copyright">
+          © 2026 生活保護費シミュレーター (Zero-Data Retention Architecture)
+        </div>
+      </footer>
+    </div>
+
+    <!-- 下部追従サマリーバー -->
+    <aside class="bottom-sticky-bar" aria-label="支給見込額サマリー">
+      <div class="sticky-content">
+        <div class="sticky-label-group">
+          <span class="sticky-title">受給見込額（月額）</span>
+          <span class="sticky-sub" id="sticky-household-desc">1人世帯 / 1級地-1</span>
+        </div>
+        <div class="sticky-amounts-wrapper">
+          <div class="sticky-effective-group">
+            <span class="sticky-effective-label">手元生活費(可処分)</span>
+            <span class="sticky-effective-val">¥<span id="sticky-effective-amount">0</span></span>
+          </div>
+          <div class="sticky-amount-group">
+            <span class="sticky-currency">¥</span>
+            <span id="sticky-total-amount" class="sticky-amount">0</span>
+            <span class="sticky-unit">/月</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- クライアントサイド計算スクリプト (Vanilla TypeScript) -->
+    <script>
+      import { calculateWelfare } from '../logic/calculator';
+      import type { CalculationInput, PersonInput, DisabilityDetailType, FeePaymentType } from '../logic/types';
+      import type { Grade, WinterZone } from '../schemas/masterSchema';
+
+      // 初期世帯員データ
+      let members: PersonInput[] = [
+        { id: 'member_1', age: 35, disabilityDetail: 'none' },
+      ];
+
+      // 現在選択中の自治体マスター
+      let currentMunicipalities: Array<{
+        code: string;
+        name: string;
+        grade: Grade;
+        housingLimit: { '1': number; '2': number; '3_5': number; '6_plus': number };
+      }> = [];
+
+      let currentWinterZone: WinterZone = 'VI';
+
+      // 自治体キャッシュ
+      const muniCache = new Map<string, any>();
+
+      // 標準フォールバック
+      const defaultHousingLimits = {
+        '1-1': { '1': 53700, '2': 64000, '3_5': 69800, '6_plus': 75000 },
+        '1-2': { '1': 46000, '2': 55000, '3_5': 59800, '6_plus': 65000 },
+        '2-1': { '1': 40000, '2': 48000, '3_5': 52000, '6_plus': 56000 },
+        '2-2': { '1': 36000, '2': 43000, '3_5': 47000, '6_plus': 51000 },
+        '3-1': { '1': 33000, '2': 40000, '3_5': 43000, '6_plus': 47000 },
+        '3-2': { '1': 29000, '2': 35000, '3_5': 38000, '6_plus': 41000 },
+      };
+
+      // DOM参照
+      const prefSelect = document.getElementById('pref-select') as HTMLSelectElement;
+      const muniSelect = document.getElementById('muni-select') as HTMLSelectElement;
+      const gradeBadge = document.getElementById('current-grade-badge') as HTMLElement;
+      const winterBadge = document.getElementById('current-winter-zone-badge') as HTMLElement;
+      const membersList = document.getElementById('members-list') as HTMLElement;
+      const btnAddMember = document.getElementById('btn-add-member') as HTMLButtonElement;
+      const isSingleParentCheckbox = document.getElementById('is-single-parent') as HTMLInputElement;
+      
+      const labelRent = document.getElementById('label-rent') as HTMLElement;
+      const hintRent = document.getElementById('hint-rent') as HTMLElement;
+      const pureRentInput = document.getElementById('pure-rent-input') as HTMLInputElement;
+      const commonFeeInput = document.getElementById('common-fee-input') as HTMLInputElement;
+      const groupCommonFee = document.getElementById('group-common-fee') as HTMLElement;
+      const feeRadioButtons = document.querySelectorAll('input[name="fee-payment-type"]') as NodeListOf<HTMLInputElement>;
+
+      // 結果表示DOM参照
+      const resTotalAmount = document.getElementById('res-total-amount') as HTMLElement;
+      const resEffectiveLiving = document.getElementById('res-effective-living') as HTMLElement;
+      const stickyTotalAmount = document.getElementById('sticky-total-amount') as HTMLElement;
+      const stickyEffectiveAmount = document.getElementById('sticky-effective-amount') as HTMLElement;
+      const stickyHouseholdDesc = document.getElementById('sticky-household-desc') as HTMLElement;
+      const resWinterTotal = document.getElementById('res-winter-total') as HTMLElement;
+      const resLivelihoodAmount = document.getElementById('res-livelihood-amount') as HTMLElement;
+      const resCat1Sum = document.getElementById('res-cat1-sum') as HTMLElement;
+      const resMemberCountDesc = document.getElementById('res-member-count-desc') as HTMLElement;
+      const resReductionRate = document.getElementById('res-reduction-rate') as HTMLElement;
+      const resCat1Reduced = document.getElementById('res-cat1-reduced') as HTMLElement;
+      const resCat2 = document.getElementById('res-cat2') as HTMLElement;
+      const resBaseAmount = document.getElementById('res-base-amount') as HTMLElement;
+      const resSpecialCount = document.getElementById('res-special-count') as HTMLElement;
+      const resSpecialAddition = document.getElementById('res-special-addition') as HTMLElement;
+      const resTransitionalAddition = document.getElementById('res-transitional-addition') as HTMLElement;
+      const resCalc2026 = document.getElementById('res-calc-2026') as HTMLElement;
+      const resGuaranteed = document.getElementById('res-guaranteed') as HTMLElement;
+      const resTotalAdditions = document.getElementById('res-total-additions') as HTMLElement;
+      const resChildCount = document.getElementById('res-child-count') as HTMLElement;
+      const resChildCareAddition = document.getElementById('res-child-care-addition') as HTMLElement;
+      const resSingleParentAddition = document.getElementById('res-single-parent-addition') as HTMLElement;
+      const resDisabilityCount = document.getElementById('res-disability-count') as HTMLElement;
+      const resDisabilityAddition = document.getElementById('res-disability-addition') as HTMLElement;
+      
+      const resHousingAmount = document.getElementById('res-housing-amount') as HTMLElement;
+      const resHousingLimit = document.getElementById('res-housing-limit') as HTMLElement;
+      const resInputPureRent = document.getElementById('res-input-pure-rent') as HTMLElement;
+      const rowInputPureRent = document.getElementById('row-input-pure-rent') as HTMLElement;
+      const resInputCommonFee = document.getElementById('res-input-common-fee') as HTMLElement;
+      const rowInputCommonFee = document.getElementById('row-input-common-fee') as HTMLElement;
+      const resFeeTypeDesc = document.getElementById('res-fee-type-desc') as HTMLElement;
+      const rowOutOfPocketFee = document.getElementById('row-out-of-pocket-fee') as HTMLElement;
+      const resOutOfPocketFee = document.getElementById('res-out-of-pocket-fee') as HTMLElement;
+      const rowExcessRent = document.getElementById('row-excess-rent') as HTMLElement;
+      const resExcessRent = document.getElementById('res-excess-rent') as HTMLElement;
+      const resHousingRuleExplanation = document.getElementById('res-housing-rule-explanation') as HTMLElement;
+
+      // 支払いタイプ取得
+      function getFeePaymentType(): FeePaymentType {
+        let selected: FeePaymentType = 'separate';
+        feeRadioButtons.forEach(r => {
+          if (r.checked) selected = r.value as FeePaymentType;
+        });
+        return selected;
+      }
+
+      // 自治体データ取得
+      async function loadPrefectureData(prefCode: string) {
+        if (muniCache.has(prefCode)) {
+          const data = muniCache.get(prefCode);
+          applyMuniData(data);
+          return;
+        }
+
+        try {
+          const res = await fetch(`/data/municipalities/${prefCode}.json`);
+          if (!res.ok) throw new Error('Fetch failed');
+          const data = await res.json();
+          muniCache.set(prefCode, data);
+          applyMuniData(data);
+        } catch (err) {
+          console.warn('Fallback municipality loaded due to fetch error:', err);
+          const fallbackData = {
+            prefCode,
+            prefName: '選択自治体',
+            winterZone: 'VI' as WinterZone,
+            municipalities: [
+              {
+                code: `${prefCode}001`,
+                name: '代表自治体（標準1-1）',
+                grade: '1-1' as Grade,
+                housingLimit: defaultHousingLimits['1-1'],
+              },
+              {
+                code: `${prefCode}002`,
+                name: 'その他一般市（標準2-1）',
+                grade: '2-1' as Grade,
+                housingLimit: defaultHousingLimits['2-1'],
+              },
+            ],
+          };
+          applyMuniData(fallbackData);
+        }
+      }
+
+      function applyMuniData(data: any) {
+        currentWinterZone = data.winterZone;
+        currentMunicipalities = data.municipalities;
+
+        // セレクトボックスのオプション更新
+        muniSelect.innerHTML = '';
+        for (const m of currentMunicipalities) {
+          const opt = document.createElement('option');
+          opt.value = m.code;
+          opt.textContent = `${m.name} (${m.grade}級地)`;
+          muniSelect.appendChild(opt);
+        }
+
+        if (currentMunicipalities.length > 0) {
+          muniSelect.selectedIndex = 0;
+        }
+
+        updateGradeDisplay();
+        runCalculation();
+      }
+
+      function getSelectedMunicipality() {
+        const code = muniSelect.value;
+        const found = currentMunicipalities.find(m => m.code === code);
+        if (found) return found;
+        if (currentMunicipalities.length > 0) return currentMunicipalities[0];
+        return {
+          code: '13001',
+          name: '特別区（23区）',
+          grade: '1-1' as Grade,
+          housingLimit: defaultHousingLimits['1-1'],
+        };
+      }
+
+      function updateGradeDisplay() {
+        const muni = getSelectedMunicipality();
+        gradeBadge.textContent = `${muni.grade}級地`;
+        winterBadge.textContent = `${currentWinterZone}区`;
+      }
+
+      // 世帯員カードのレンダリング
+      function renderMembers() {
+        membersList.innerHTML = '';
+        members.forEach((m, idx) => {
+          const card = document.createElement('div');
+          card.className = 'member-card';
+          card.setAttribute('role', 'listitem');
+
+          const header = document.createElement('div');
+          header.className = 'member-card-header';
+
+          const tag = document.createElement('span');
+          tag.className = 'member-tag';
+          tag.textContent = idx === 0 ? `世帯主（本人）` : `世帯員 ${idx + 1}`;
+          header.appendChild(tag);
+
+          if (members.length > 1) {
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.className = 'btn-remove-member';
+            removeBtn.setAttribute('aria-label', `世帯員${idx + 1}を削除`);
+            removeBtn.textContent = '削除';
+            removeBtn.addEventListener('click', () => {
+              members.splice(idx, 1);
+              renderMembers();
+              runCalculation();
+            });
+            header.appendChild(removeBtn);
+          }
+
+          const controls = document.createElement('div');
+          controls.className = 'member-controls';
+
+          // 年齢選択
+          const ageGroup = document.createElement('div');
+          ageGroup.className = 'form-group';
+          const ageLabel = document.createElement('label');
+          ageLabel.className = 'form-label';
+          ageLabel.htmlFor = `age-${m.id}`;
+          ageLabel.textContent = '年齢';
+
+          const ageInput = document.createElement('input');
+          ageInput.type = 'number';
+          ageInput.id = `age-${m.id}`;
+          ageInput.className = 'form-input';
+          ageInput.min = '0';
+          ageInput.max = '120';
+          ageInput.value = String(m.age);
+          ageInput.addEventListener('input', (e) => {
+            const val = parseInt((e.target as HTMLInputElement).value, 10);
+            m.age = isNaN(val) ? 0 : Math.max(0, Math.min(120, val));
+            runCalculation();
+          });
+
+          ageGroup.appendChild(ageLabel);
+          ageGroup.appendChild(ageInput);
+
+          // 障害区分選択（細分化）
+          const disGroup = document.createElement('div');
+          disGroup.className = 'form-group';
+          const disLabel = document.createElement('label');
+          disLabel.className = 'form-label';
+          disLabel.htmlFor = `dis-${m.id}`;
+          disLabel.textContent = '障害者手帳・年金区分';
+
+          const disSelect = document.createElement('select');
+          disSelect.id = `dis-${m.id}`;
+          disSelect.className = 'form-select';
+
+          // 該当なし
+          const optNone = document.createElement('option');
+          optNone.value = 'none';
+          optNone.textContent = '該当なし（手帳・年金なし）';
+          disSelect.appendChild(optNone);
+
+          // 区分Aグループ
+          const optGroupA = document.createElement('optgroup');
+          optGroupA.label = '区分Aに該当（高額加算：月約2.6万円）';
+
+          const optPhyA = document.createElement('option');
+          optPhyA.value = 'physical_1_2';
+          optPhyA.textContent = '身体障害者手帳 1級 または 2級';
+          optGroupA.appendChild(optPhyA);
+
+          const optMenA = document.createElement('option');
+          optMenA.value = 'mental_1';
+          optMenA.textContent = '精神障害者保健福祉手帳 1級';
+          optGroupA.appendChild(optMenA);
+
+          const optPenA = document.createElement('option');
+          optPenA.value = 'pension_1';
+          optPenA.textContent = '障害基礎年金 1級（年金受給相当）';
+          optGroupA.appendChild(optPenA);
+
+          const optChildA = document.createElement('option');
+          optChildA.value = 'special_child_1';
+          optChildA.textContent = '特別児童扶養手当 1級（20歳未満）';
+          optGroupA.appendChild(optChildA);
+
+          disSelect.appendChild(optGroupA);
+
+          // 区分Bグループ
+          const optGroupB = document.createElement('optgroup');
+          optGroupB.label = '区分Bに該当（一般加算：月約1.8万円）';
+
+          const optPhyB = document.createElement('option');
+          optPhyB.value = 'physical_3';
+          optPhyB.textContent = '身体障害者手帳 3級';
+          optGroupB.appendChild(optPhyB);
+
+          const optMenB = document.createElement('option');
+          optMenB.value = 'mental_2';
+          optMenB.textContent = '精神障害者保健福祉手帳 2級';
+          optGroupB.appendChild(optMenB);
+
+          const optPenB = document.createElement('option');
+          optPenB.value = 'pension_2';
+          optPenB.textContent = '障害基礎年金 2級（年金受給相当）';
+          optGroupB.appendChild(optPenB);
+
+          const optChildB = document.createElement('option');
+          optChildB.value = 'special_child_2';
+          optChildB.textContent = '特別児童扶養手当 2級（20歳未満）';
+          optGroupB.appendChild(optChildB);
+
+          disSelect.appendChild(optGroupB);
+
+          disSelect.value = m.disabilityDetail;
+
+          disSelect.addEventListener('change', (e) => {
+            m.disabilityDetail = (e.target as HTMLSelectElement).value as DisabilityDetailType;
+            runCalculation();
+          });
+
+          disGroup.appendChild(disLabel);
+          disGroup.appendChild(disSelect);
+
+          controls.appendChild(ageGroup);
+          controls.appendChild(disGroup);
+
+          card.appendChild(header);
+          card.appendChild(controls);
+
+          membersList.appendChild(card);
+        });
+      }
+
+      // 共益費・家賃入力UIの連動制御
+      function updateFeeInputState() {
+        const feeType = getFeePaymentType();
+        if (feeType === 'included') {
+          // 共益費込契約
+          commonFeeInput.value = '';
+          commonFeeInput.disabled = true;
+          groupCommonFee.style.opacity = '0.5';
+          labelRent.textContent = '月額の家賃（共益費込の総賃料）';
+          hintRent.textContent = '※共益費込の賃料が自治体の上限額以内であれば、全額が住宅扶助で支給されます。';
+        } else {
+          // 別払い
+          commonFeeInput.disabled = false;
+          groupCommonFee.style.opacity = '1';
+          labelRent.textContent = '月額の家賃（純賃料）';
+          hintRent.textContent = '※共益費・管理費を除いた純賃料を入力してください。';
+        }
+      }
+
+      // 計算実行
+      function runCalculation() {
+        if (members.length === 0) return;
+
+        const muni = getSelectedMunicipality();
+        const rentRaw = pureRentInput.value.trim();
+        const parsedRent = rentRaw !== '' ? Number(rentRaw) : null;
+
+        const feeRaw = commonFeeInput.value.trim();
+        const parsedFee = feeRaw !== '' ? Number(feeRaw) : null;
+
+        const feePaymentType = getFeePaymentType();
+
+        const input: CalculationInput = {
+          grade: muni.grade,
+          members,
+          isSingleParent: isSingleParentCheckbox.checked,
+          pureRent: parsedRent,
+          commonServiceFee: parsedFee,
+          feePaymentType,
+          winterZone: currentWinterZone,
+        };
+
+        const res = calculateWelfare(input, muni.housingLimit);
+
+        // UI反映
+        const formattedTotal = res.totalBenefitMonthly.toLocaleString();
+        const formattedEffective = res.effectiveLivingAllowance.toLocaleString();
+        
+        resTotalAmount.textContent = formattedTotal;
+        resEffectiveLiving.textContent = formattedEffective;
+        stickyTotalAmount.textContent = formattedTotal;
+        stickyEffectiveAmount.textContent = formattedEffective;
+        stickyHouseholdDesc.textContent = `${members.length}人世帯 / ${muni.name} (${muni.grade})`;
+
+        resWinterTotal.textContent = `¥${res.winterTotalBenefitMonthly.toLocaleString()}`;
+
+        // 生活扶助
+        resLivelihoodAmount.textContent = res.livelihoodStandard.finalLivelihoodAmount.toLocaleString();
+        resCat1Sum.textContent = res.livelihoodStandard.category1Sum.toLocaleString();
+        resMemberCountDesc.textContent = String(members.length);
+        resReductionRate.textContent = String(res.livelihoodStandard.reductionRate);
+        resCat1Reduced.textContent = res.livelihoodStandard.category1Reduced.toLocaleString();
+        resCat2.textContent = res.livelihoodStandard.category2.toLocaleString();
+        resBaseAmount.textContent = res.livelihoodStandard.baseAmount.toLocaleString();
+        resSpecialCount.textContent = String(members.length);
+        resSpecialAddition.textContent = res.livelihoodStandard.temporarySpecialAddition.toLocaleString();
+        resTransitionalAddition.textContent = res.livelihoodStandard.transitionalAddition.toLocaleString();
+        resCalc2026.textContent = res.livelihoodStandard.calculated2026.toLocaleString();
+        resGuaranteed.textContent = res.livelihoodStandard.guaranteedAmount.toLocaleString();
+
+        // 各種加算
+        resTotalAdditions.textContent = res.additions.totalAdditions.toLocaleString();
+        resChildCount.textContent = String(res.additions.childCareCount);
+        resChildCareAddition.textContent = res.additions.childCareAddition.toLocaleString();
+        resSingleParentAddition.textContent = res.additions.singleParentAddition.toLocaleString();
+        
+        const totalDisCount = res.additions.disabilityTypeACount + res.additions.disabilityTypeBCount;
+        resDisabilityCount.textContent = String(totalDisCount);
+        resDisabilityAddition.textContent = res.additions.disabilityAddition.toLocaleString();
+
+        // 住宅扶助
+        resHousingAmount.textContent = res.housingAssistance.approvedHousingAmount.toLocaleString();
+        resHousingLimit.textContent = res.housingAssistance.limit.toLocaleString();
+
+        if (res.housingAssistance.pureRent !== null) {
+          rowInputPureRent.style.display = 'flex';
+          resInputPureRent.textContent = res.housingAssistance.pureRent.toLocaleString();
+        } else {
+          rowInputPureRent.style.display = 'none';
+        }
+
+        if (feePaymentType === 'included') {
+          resFeeTypeDesc.textContent = '家賃込契約';
+          rowInputCommonFee.style.display = 'none';
+          rowOutOfPocketFee.style.display = 'none';
+          resHousingRuleExplanation.textContent = '※共益費込契約のため、上限額の範囲内で全額が住宅扶助から支給されます。';
+        } else {
+          resFeeTypeDesc.textContent = '別払い';
+          const feeVal = res.housingAssistance.commonServiceFee ?? 0;
+          if (feeVal > 0) {
+            rowInputCommonFee.style.display = 'flex';
+            resInputCommonFee.textContent = feeVal.toLocaleString();
+            rowOutOfPocketFee.style.display = 'flex';
+            resOutOfPocketFee.textContent = res.housingAssistance.outOfPocketFee.toLocaleString();
+            resHousingRuleExplanation.textContent = '※共益費・管理費は住宅扶助対象外のため、日々の生活費（生活扶助）から自己負担となります。';
+          } else {
+            rowInputCommonFee.style.display = 'none';
+            rowOutOfPocketFee.style.display = 'none';
+            resHousingRuleExplanation.textContent = '※共益費・管理費が別払いの場合は住宅扶助の支給対象外となります。';
+          }
+        }
+
+        if (res.housingAssistance.excessRent > 0) {
+          rowExcessRent.style.display = 'flex';
+          resExcessRent.textContent = res.housingAssistance.excessRent.toLocaleString();
+        } else {
+          rowExcessRent.style.display = 'none';
+        }
+      }
+
+      // イベントリスナー設定
+      prefSelect.addEventListener('change', () => {
+        loadPrefectureData(prefSelect.value);
+      });
+
+      muniSelect.addEventListener('change', () => {
+        updateGradeDisplay();
+        runCalculation();
+      });
+
+      btnAddMember.addEventListener('click', () => {
+        const nextId = `member_${Date.now()}`;
+        members.push({ id: nextId, age: 30, disabilityDetail: 'none' });
+        renderMembers();
+        runCalculation();
+      });
+
+      isSingleParentCheckbox.addEventListener('change', () => {
+        runCalculation();
+      });
+
+      feeRadioButtons.forEach(r => {
+        r.addEventListener('change', () => {
+          updateFeeInputState();
+          runCalculation();
+        });
+      });
+
+      pureRentInput.addEventListener('input', () => {
+        runCalculation();
+      });
+
+      commonFeeInput.addEventListener('input', () => {
+        runCalculation();
+      });
+
+      // 初期ロード
+      updateFeeInputState();
+      renderMembers();
+      loadPrefectureData(prefSelect.value);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,24 @@
+{
+  "name": "seiho-calc",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev --host",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "validate": "tsx scripts/validate_schemas.ts",
+    "test": "tsx scripts/validate_schemas.ts && vitest run"
+  },
+  "dependencies": {
+    "astro": "^5.4.2",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "tsx": "^4.23.15",
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.7",
+    "wrangler": "^3.111.0"
+  }
+}
