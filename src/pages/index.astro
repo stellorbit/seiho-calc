@@ -107,6 +107,59 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
         font-size: 1rem;
       }
 
+      .ai-credit-box {
+        margin-top: 0.75rem;
+        padding: 0.4rem 0.875rem;
+        background-color: #f1f5f9;
+        border: 1px solid #cbd5e1;
+        border-radius: 9999px;
+        display: inline-flex;
+        align-items: center;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem;
+        font-size: 0.8125rem;
+        color: #334155;
+      }
+
+      .ai-credit-label {
+        font-weight: 700;
+        color: #1e293b;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+      }
+
+      .ai-credit-items {
+        display: inline-flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.375rem;
+      }
+
+      .ai-pill {
+        background-color: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 9999px;
+        padding: 0.125rem 0.5rem;
+        color: #1e293b;
+      }
+
+      .ai-pill strong {
+        color: #1d4ed8;
+      }
+
+      .footer-ai-credit {
+        text-align: center;
+        font-size: 0.8125rem;
+        color: #64748b;
+        margin-bottom: 0.625rem;
+      }
+
+      .footer-ai-credit strong {
+        color: #1e293b;
+      }
+
       .main-layout {
         display: grid;
         grid-template-columns: 1fr;
@@ -323,6 +376,13 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
           <span class="privacy-icon">🔒</span>
           <span><strong>プライバシー完全保護</strong>: 入力内容は端末のブラウザ内でのみ計算され、外部サーバーへの送信・保存は一切行われません。</span>
         </div>
+        <div class="ai-credit-box" role="note" aria-label="生成AI利用クレジット">
+          <span class="ai-credit-label">✨ 生成AI利用クレジット:</span>
+          <div class="ai-credit-items">
+            <span class="ai-pill">計画書作成: <strong>Gemini 4 Argon</strong></span>
+            <span class="ai-pill">サイト作成: <strong>Gemini 3.8 Flash</strong></span>
+          </div>
+        </div>
       </header>
 
       <main class="main-layout">
@@ -347,6 +407,9 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
             <li>給与収入や年金収入等がある場合は、基礎控除等を差し引いた額が保護費から控除（収入認定）されます。</li>
             <li>本ツールは完全クライアントサイド演算（Zero-Data Retention）で動作しており、入力された個人情報がインターネット経由で送信・保存されることはありません。</li>
           </ul>
+        </div>
+        <div class="footer-ai-credit">
+          生成AI利用クレジット: 計画書作成 <strong>Gemini 4 Argon</strong> ｜ サイト作成 <strong>Gemini 3.8 Flash</strong>
         </div>
         <div class="copyright">
           © 2026 生活保護費シミュレーター (Zero-Data Retention Architecture)
