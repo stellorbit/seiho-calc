@@ -10,10 +10,7 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="description" content="生活保護費（生活扶助＋住宅扶助＋各種加算）の受給見込額を即時試算するシミュレーター。令和8年（2026年）10月改正基準対応・完全クライアントサイド演算でプライバシーを完全保護。" />
     <title>生活保護受給額シミュレーター（令和8年10月改正基準・全国詳細市町村対応）</title>
-    <!-- Google Fonts: BIZ UDPGothic -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&display=swap" rel="stylesheet" />
+    <!-- システムUDフォントスタック（外部通信ゼロ・完全自己完結） -->
     <style is:global>
       :root {
         --color-bg: #f8fafc;
@@ -24,7 +21,7 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
         --color-primary-hover: #1e40af;
         --color-primary-light: #eff6ff;
         --color-border: #cbd5e1;
-        --font-family-ud: 'BIZ UDPGothic', 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
+        --font-family-ud: 'BIZ UDPGothic', 'BIZ UDPゴシック', 'Hiragino Kaku Gothic ProN', 'ヒラギノ角ゴ ProN W3', 'Noto Sans JP', 'Meiryo', 'メイリオ', sans-serif;
       }
 
       * {

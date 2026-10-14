@@ -30,23 +30,23 @@
 ## ローカル実行
 
 ```bash
-# 依存関係のインストール
-npm install
+# 依存関係のインストール（pnpm推奨）
+pnpm install
 
 # 自治体マスターデータの生成
 node scripts/generate_municipalities.js
 
 # スキーマ検証および単体テスト
-npm test
+pnpm test
 
 # 開発サーバー起動
-npm run dev
+pnpm run dev
 
 # 静的ビルド
-npm run build
+pnpm run build
 
 # ビルド成果物のプレビュー
-npm run preview
+pnpm run preview
 ```
 
 ## 免責事項
