@@ -74,8 +74,10 @@
     </div>
 
     <div class="grade-badge-container">
-      <span class="info-label">適用級地:</span>
-      <span id="current-grade-badge" class="badge-grade">1級地-1</span>
+      <span class="info-label">選択地域:</span>
+      <strong id="current-muni-name" class="muni-name-text">特別区（23区）</strong>
+      <span class="info-label ml-sm">適用級地:</span>
+      <span id="current-grade-badge" class="badge-grade">1-1級地</span>
       <span class="info-label ml-sm">冬季加算地域:</span>
       <span id="current-winter-zone-badge" class="badge-sub">VI区</span>
     </div>
@@ -352,6 +354,12 @@
   .info-label {
     color: #1e3a8a;
     font-weight: 600;
+  }
+
+  .muni-name-text {
+    color: #0f172a;
+    font-weight: 700;
+    font-size: 0.9375rem;
   }
 
   .ml-sm {

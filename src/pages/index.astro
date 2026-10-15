@@ -475,6 +475,7 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
       // DOM参照
       const prefSelect = document.getElementById('pref-select') as HTMLSelectElement;
       const muniSelect = document.getElementById('muni-select') as HTMLSelectElement;
+      const currentMuniName = document.getElementById('current-muni-name') as HTMLElement;
       const gradeBadge = document.getElementById('current-grade-badge') as HTMLElement;
       const winterBadge = document.getElementById('current-winter-zone-badge') as HTMLElement;
       const membersList = document.getElementById('members-list') as HTMLElement;
@@ -584,7 +585,7 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
         for (const m of currentMunicipalities) {
           const opt = document.createElement('option');
           opt.value = m.code;
-          opt.textContent = `${m.name} (${m.grade}級地)`;
+          opt.textContent = m.name;
           muniSelect.appendChild(opt);
         }
 
@@ -611,6 +612,9 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
 
       function updateGradeDisplay() {
         const muni = getSelectedMunicipality();
+        if (currentMuniName) {
+          currentMuniName.textContent = muni.name;
+        }
         gradeBadge.textContent = `${muni.grade}級地`;
         winterBadge.textContent = `${currentWinterZone}区`;
       }
