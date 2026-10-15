@@ -10,6 +10,10 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="description" content="生活保護費（生活扶助＋住宅扶助＋各種加算）の受給見込額を即時試算するシミュレーター。令和8年（2026年）10月改正基準対応・完全クライアントサイド演算でプライバシーを完全保護。" />
     <title>生活保護受給額シミュレーター（令和8年10月改正基準・全国詳細市町村対応）</title>
+    <!-- セキュリティポリシー（外部通信遮断・Zero-Data Retention保護） -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self';" />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta name="referrer" content="no-referrer" />
     <!-- システムUDフォントスタック（外部通信ゼロ・完全自己完結） -->
     <style is:global>
       :root {
@@ -446,7 +450,7 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
 
       // 初期世帯員データ
       let members: PersonInput[] = [
-        { id: 'member_1', age: 35, disabilityDetail: 'none' },
+        { id: 'member_1', age: null, disabilityDetail: 'none' },
       ];
 
       // 現在選択中の自治体マスター
@@ -527,6 +531,8 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
       const rowExcessRent = document.getElementById('row-excess-rent') as HTMLElement;
       const resExcessRent = document.getElementById('res-excess-rent') as HTMLElement;
       const resHousingRuleExplanation = document.getElementById('res-housing-rule-explanation') as HTMLElement;
+      const calcStatusAlert = document.getElementById('calc-status-alert') as HTMLElement;
+      const calcStatusMessage = document.getElementById('calc-status-message') as HTMLElement;
 
       // 支払いタイプ取得
       function getFeePaymentType(): FeePaymentType {
@@ -658,7 +664,7 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
           const ageLabel = document.createElement('label');
           ageLabel.className = 'form-label';
           ageLabel.htmlFor = `age-${m.id}`;
-          ageLabel.textContent = '年齢';
+          ageLabel.innerHTML = '年齢 <span class="required-badge">必須</span>';
 
           const ageInput = document.createElement('input');
           ageInput.type = 'number';
@@ -666,15 +672,31 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
           ageInput.className = 'form-input';
           ageInput.min = '0';
           ageInput.max = '120';
-          ageInput.value = String(m.age);
+          ageInput.placeholder = '例: 35';
+          ageInput.required = true;
+          ageInput.setAttribute('aria-required', 'true');
+          ageInput.value = m.age !== null && m.age !== undefined ? String(m.age) : '';
+
+          const ageError = document.createElement('p');
+          ageError.id = `error-age-${m.id}`;
+          ageError.className = 'field-error-text';
+          ageError.style.display = 'none';
+          ageError.textContent = idx === 0 ? '世帯主（本人）の年齢を入力してください（0〜120歳）' : `世帯員${idx + 1}の年齢を入力してください（0〜120歳）`;
+
           ageInput.addEventListener('input', (e) => {
-            const val = parseInt((e.target as HTMLInputElement).value, 10);
-            m.age = isNaN(val) ? 0 : Math.max(0, Math.min(120, val));
+            const raw = (e.target as HTMLInputElement).value.trim();
+            if (raw === '') {
+              m.age = null;
+            } else {
+              const val = parseInt(raw, 10);
+              m.age = isNaN(val) ? null : Math.max(0, Math.min(120, val));
+            }
             runCalculation();
           });
 
           ageGroup.appendChild(ageLabel);
           ageGroup.appendChild(ageInput);
+          ageGroup.appendChild(ageError);
 
           // 障害区分選択（細分化）
           const disGroup = document.createElement('div');
@@ -789,6 +811,84 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
       function runCalculation() {
         if (members.length === 0) return;
 
+        // 年齢未入力チェック
+        let hasError = false;
+        let firstErrorMessage = '';
+
+        members.forEach((m, idx) => {
+          const inputEl = document.getElementById(`age-${m.id}`) as HTMLInputElement | null;
+          const errEl = document.getElementById(`error-age-${m.id}`) as HTMLElement | null;
+
+          if (m.age === null || m.age === undefined || isNaN(m.age)) {
+            hasError = true;
+            if (inputEl) {
+              inputEl.classList.add('is-invalid');
+              inputEl.setAttribute('aria-invalid', 'true');
+            }
+            if (errEl) {
+              errEl.style.display = 'block';
+            }
+            if (!firstErrorMessage) {
+              firstErrorMessage = idx === 0
+                ? '世帯主（本人）の年齢を入力してください。'
+                : `世帯員 ${idx + 1} の年齢を入力してください。`;
+            }
+          } else {
+            if (inputEl) {
+              inputEl.classList.remove('is-invalid');
+              inputEl.removeAttribute('aria-invalid');
+            }
+            if (errEl) {
+              errEl.style.display = 'none';
+            }
+          }
+        });
+
+        if (hasError) {
+          if (calcStatusAlert && calcStatusMessage) {
+            calcStatusAlert.style.display = 'flex';
+            calcStatusMessage.textContent = firstErrorMessage;
+          }
+          resTotalAmount.textContent = '-';
+          resEffectiveLiving.textContent = '-';
+          stickyTotalAmount.textContent = '-';
+          stickyEffectiveAmount.textContent = '-';
+          stickyHouseholdDesc.textContent = `${members.length}人世帯 / 年齢未入力`;
+          resWinterTotal.textContent = '-';
+
+          resLivelihoodAmount.textContent = '-';
+          resCat1Sum.textContent = '-';
+          resMemberCountDesc.textContent = String(members.length);
+          resReductionRate.textContent = '-';
+          resCat1Reduced.textContent = '-';
+          resCat2.textContent = '-';
+          resBaseAmount.textContent = '-';
+          resSpecialCount.textContent = String(members.length);
+          resSpecialAddition.textContent = '-';
+          resTransitionalAddition.textContent = '-';
+          resCalc2026.textContent = '-';
+          resGuaranteed.textContent = '-';
+
+          resTotalAdditions.textContent = '-';
+          resChildCount.textContent = '-';
+          resChildCareAddition.textContent = '-';
+          resSingleParentAddition.textContent = '-';
+          resDisabilityCount.textContent = '-';
+          resDisabilityAddition.textContent = '-';
+
+          resHousingAmount.textContent = '-';
+          resHousingLimit.textContent = '-';
+          rowInputPureRent.style.display = 'none';
+          rowInputCommonFee.style.display = 'none';
+          rowOutOfPocketFee.style.display = 'none';
+          rowExcessRent.style.display = 'none';
+          return;
+        }
+
+        if (calcStatusAlert) {
+          calcStatusAlert.style.display = 'none';
+        }
+
         const muni = getSelectedMunicipality();
         const rentRaw = pureRentInput.value.trim();
         const parsedRent = rentRaw !== '' ? Number(rentRaw) : null;
@@ -898,7 +998,7 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
 
       btnAddMember.addEventListener('click', () => {
         const nextId = `member_${Date.now()}`;
-        members.push({ id: nextId, age: 30, disabilityDetail: 'none' });
+        members.push({ id: nextId, age: null, disabilityDetail: 'none' });
         renderMembers();
         runCalculation();
       });

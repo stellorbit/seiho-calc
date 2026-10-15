@@ -50,6 +50,9 @@ export function calculateWelfare(
   // 1. 第1類合算
   let category1Sum = 0;
   for (const m of input.members) {
+    if (m.age === null || m.age === undefined || isNaN(m.age)) {
+      throw new Error(`世帯員の年齢が未入力です（ID: ${m.id}）。年齢を正しく入力してください。`);
+    }
     const ageCat = getAgeCategory(m.age);
     category1Sum += criteriaData.category1Standard[ageCat][grade];
   }

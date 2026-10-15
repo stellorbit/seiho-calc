@@ -13,7 +13,7 @@ export type DisabilityDetailType =
 
 export interface PersonInput {
   id: string;
-  age: number;
+  age: number | null;
   disabilityDetail: DisabilityDetailType;
 }
 

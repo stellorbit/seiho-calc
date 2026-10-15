@@ -3,6 +3,15 @@
 ---
 
 <div class="result-container" aria-live="polite">
+  <!-- 入力エラー・未入力案内バナー -->
+  <div id="calc-status-alert" class="calc-status-alert" role="alert" style="display: none;">
+    <span class="status-alert-icon" aria-hidden="true">⚠️</span>
+    <div class="status-alert-body">
+      <strong class="status-alert-title">世帯主（本人）の年齢を入力してください</strong>
+      <p id="calc-status-message" class="status-alert-text">生活保護費の正確な算定には、世帯主の年齢入力が必須です。</p>
+    </div>
+  </div>
+
   <!-- サマリーカード: 支給見込総額 -->
   <div class="summary-card">
     <div class="summary-header">
@@ -150,6 +159,43 @@
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+  }
+
+  .calc-status-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    background-color: #fff1f2;
+    border: 1.5px solid #fecdd3;
+    border-radius: 0.75rem;
+    color: #9f1239;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+  }
+
+  .status-alert-icon {
+    font-size: 1.375rem;
+    line-height: 1;
+    margin-top: 0.125rem;
+  }
+
+  .status-alert-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .status-alert-title {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: #881337;
+  }
+
+  .status-alert-text {
+    font-size: 0.875rem;
+    margin: 0;
+    line-height: 1.4;
+    color: #9f1239;
   }
 
   .summary-card {

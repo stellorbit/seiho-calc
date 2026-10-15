@@ -206,4 +206,14 @@ describe('生活保護費計算ロジック（令和8年10月改正基準・拡�
     expect(res.housingAssistance.excessRent).toBe(2300);
     expect(res.effectiveLivingAllowance).toBe(87480 - 2300);
   });
+
+  it('エラー検証: 年齢が未入力（null）の場合は例外をスローすること', () => {
+    const input: CalculationInput = {
+      grade: '1-1',
+      members: [{ id: '1', age: null, disabilityDetail: 'none' }],
+      isSingleParent: false,
+      feePaymentType: 'separate',
+    };
+    expect(() => calculateWelfare(input, standardTokyoLimits)).toThrow('年齢が未入力です');
+  });
 });
