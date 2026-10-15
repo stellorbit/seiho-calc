@@ -6,7 +6,12 @@
   Referrer-Policy: no-referrer
   Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=(), usb=(), accelerometer=(), gyroscope=(), magnetometer=()
   Cross-Origin-Opener-Policy: same-origin
-  Cache-Control: no-store, no-cache, must-revalidate, private
+
+/
+  Cache-Control: no-cache
+
+/index.html
+  Cache-Control: no-cache
 
 /ogp.png
   Cross-Origin-Resource-Policy: cross-origin
