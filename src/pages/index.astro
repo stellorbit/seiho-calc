@@ -670,18 +670,10 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
           ageInput.type = 'number';
           ageInput.id = `age-${m.id}`;
           ageInput.className = 'form-input';
-          ageInput.min = '0';
-          ageInput.max = '120';
           ageInput.placeholder = '例: 35';
           ageInput.required = true;
           ageInput.setAttribute('aria-required', 'true');
           ageInput.value = m.age !== null && m.age !== undefined ? String(m.age) : '';
-
-          const ageError = document.createElement('p');
-          ageError.id = `error-age-${m.id}`;
-          ageError.className = 'field-error-text';
-          ageError.style.display = 'none';
-          ageError.textContent = idx === 0 ? '世帯主（本人）の年齢を入力してください（0〜120歳）' : `世帯員${idx + 1}の年齢を入力してください（0〜120歳）`;
 
           ageInput.addEventListener('input', (e) => {
             const raw = (e.target as HTMLInputElement).value.trim();
@@ -689,14 +681,13 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
               m.age = null;
             } else {
               const val = parseInt(raw, 10);
-              m.age = isNaN(val) ? null : Math.max(0, Math.min(120, val));
+              m.age = isNaN(val) ? null : val;
             }
             runCalculation();
           });
 
           ageGroup.appendChild(ageLabel);
           ageGroup.appendChild(ageInput);
-          ageGroup.appendChild(ageError);
 
           // 障害区分選択（細分化）
           const disGroup = document.createElement('div');
@@ -817,7 +808,6 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
 
         members.forEach((m, idx) => {
           const inputEl = document.getElementById(`age-${m.id}`) as HTMLInputElement | null;
-          const errEl = document.getElementById(`error-age-${m.id}`) as HTMLElement | null;
 
           if (m.age === null || m.age === undefined || isNaN(m.age)) {
             hasError = true;
@@ -825,21 +815,15 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
               inputEl.classList.add('is-invalid');
               inputEl.setAttribute('aria-invalid', 'true');
             }
-            if (errEl) {
-              errEl.style.display = 'block';
-            }
             if (!firstErrorMessage) {
               firstErrorMessage = idx === 0
-                ? '世帯主（本人）の年齢を入力してください。'
-                : `世帯員 ${idx + 1} の年齢を入力してください。`;
+                ? '世帯主（本人）の年齢を入力してください'
+                : `世帯員 ${idx + 1} の年齢を入力してください`;
             }
           } else {
             if (inputEl) {
               inputEl.classList.remove('is-invalid');
               inputEl.removeAttribute('aria-invalid');
-            }
-            if (errEl) {
-              errEl.style.display = 'none';
             }
           }
         });

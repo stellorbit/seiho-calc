@@ -91,6 +91,12 @@
     </div>
     <p class="section-desc">世帯員全員の年齢と、お持ちの障害者手帳・年金等級を選択してください。</p>
 
+    <!-- 警告・催促メッセージバナー（セクション②に統合） -->
+    <div id="calc-status-alert" class="calc-status-alert" role="alert" style="display: none;">
+      <span class="status-alert-icon" aria-hidden="true">⚠️</span>
+      <span id="calc-status-message" class="status-alert-text">世帯主（本人）の年齢を入力してください</span>
+    </div>
+
     <div id="members-list" class="members-list" role="list">
       <!-- JSでメンバーカードを生成 -->
     </div>
@@ -315,11 +321,27 @@
     box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
   }
 
-  .field-error-text {
-    color: #b91c1c;
-    font-size: 0.8125rem;
+  .calc-status-alert {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    background-color: #fff1f2;
+    border: 1.5px solid #fecdd3;
+    border-radius: 0.5rem;
+    color: #9f1239;
+    font-size: 0.875rem;
     font-weight: 600;
-    margin-top: 0.25rem;
+  }
+
+  .status-alert-icon {
+    font-size: 1.125rem;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .status-alert-text {
     line-height: 1.4;
   }
 
