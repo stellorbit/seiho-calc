@@ -13,14 +13,14 @@
     "test": "tsx scripts/validate_schemas.ts && vitest run"
   },
   "dependencies": {
-    "astro": "^7.3.8",
+    "astro": "^7.4.2",
     "zod": "^4.6.7"
   },
   "devDependencies": {
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vitest": "^5.0.4",
-    "wrangler": "^4.151.0"
+    "wrangler": "^4.151.3"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
