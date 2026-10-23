@@ -1,5 +1,11 @@
 minimumReleaseAge: 0
 
+allowBuilds:
+  esbuild: true
+  sharp: true
+  workerd: true
+
 onlyBuiltDependencies:
   - esbuild
+  - sharp
   - workerd
