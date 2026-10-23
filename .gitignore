@@ -17,3 +17,7 @@ yarn-error.log*
 # OS Files
 Thumbs.db
 .DS_Store
+
+# Backups
+*.old
+.backups/
