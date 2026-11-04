@@ -1,4 +1,5 @@
 # 生活保護費シミュレーター (seiho-calc)
+<!-- push verification: 2026-11-04 -->
 
 > **生成AI利用クレジット**
 > - **計画書作成**: Gemini 4 Argon
