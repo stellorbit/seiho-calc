@@ -126,6 +126,9 @@ describe('プライバシー保護の静的検査（外部通信・保存・動�
     expect(all).toContain('https://stellorbit.net/contact/');
     expect(all).toContain('https://x.com/OnslaughtktnP');
     expect(all).toContain('@OnslaughtktnP');
+    // ヘッダーの「お問い合わせ」メニュー
+    expect(all).toContain('class="site-menu"');
+    expect(all).toMatch(/<span>お問い合わせ<\/span>/);
     expect(all).toContain('このサイトは、生成AIを利用して構成しております。');
     expect(all).toContain('データ収集・保守');
     expect(all).toContain('Claude Opus 5.5');

@@ -4,6 +4,8 @@ import QuoteBox from './QuoteBox.astro';
 import ContactLinks from './ContactLinks.astro';
 ---
 
+<ContactLinks variant="header" />
+
 <div class="disclaimer-bar" role="note" aria-label="ご利用にあたっての重要なお知らせ">
   <p class="disclaimer-bar-inner">
     <span class="disclaimer-bar-icon" aria-hidden="true">⚠️</span>
@@ -27,7 +29,6 @@ import ContactLinks from './ContactLinks.astro';
         入力内容はお使いの端末のブラウザ内でのみ計算され、外部サーバーへの送信・保存は一切行われません。
       </span>
     </div>
-    <ContactLinks variant="header" />
   </header>
 
   <QuoteBox />

@@ -286,32 +286,133 @@ select:focus-visible {
 }
 
 /* ---------- 問い合わせ先 ---------- */
-.contact-inline {
-  max-width: 44rem;
-  margin: 0.875rem auto 0;
+/* ヘッダーのメニューバー（お問い合わせメニュー） */
+.site-nav {
+  background-color: var(--c-card);
+  border-bottom: 1px solid var(--c-line);
+  position: relative;
+  z-index: 1100;
+}
+
+.site-nav-inner {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0.25rem 1rem;
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  justify-content: center;
-  gap: 0.25rem 0.75rem;
-  font-size: 0.875rem;
-  line-height: 1.6;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 52px;
 }
 
-.contact-inline-label {
-  font-weight: 700;
+@media (min-width: 640px) {
+  .site-nav-inner {
+    padding: 0.25rem 1.5rem;
+  }
+}
+
+.site-nav-title {
+  font-size: 0.9375rem;
+  font-weight: 800;
   color: var(--c-ink);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.contact-inline-link {
+@media (max-width: 420px) {
+  .site-nav-title {
+    font-size: 0.8125rem;
+  }
+}
+
+.site-menu {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.site-menu-button {
+  list-style: none;
+  cursor: pointer;
   display: inline-flex;
   align-items: center;
+  gap: 0.375rem;
   min-height: 44px;
-  font-weight: 700;
+  padding: 0.25rem 0.875rem;
+  font-size: 0.9375rem;
+  font-weight: 800;
+  color: var(--c-primary-hover);
+  background-color: var(--c-primary-soft);
+  border: 1.5px solid var(--c-primary-line);
+  border-radius: 9999px;
+  user-select: none;
+}
+
+.site-menu-button::-webkit-details-marker {
+  display: none;
+}
+
+.site-menu-button:hover,
+.site-menu[open] > .site-menu-button {
+  border-color: var(--c-primary);
+  background-color: #f7d9c4;
+}
+
+.site-menu-caret {
+  font-size: 0.875rem;
+  transition: transform 0.15s ease;
+}
+
+.site-menu[open] .site-menu-caret {
+  transform: rotate(180deg);
+}
+
+.site-menu-list {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  width: min(19rem, calc(100vw - 2rem));
+  margin: 0;
+  padding: 0.5rem;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  background-color: var(--c-card);
+  border: 1.5px solid var(--c-line-strong);
+  border-radius: var(--radius-m);
+  box-shadow: 0 8px 24px rgba(90, 58, 30, 0.2);
+}
+
+.site-menu-link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-height: 44px;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-s);
+  text-decoration: none;
+  color: var(--c-ink);
+  overflow-wrap: anywhere;
+}
+
+.site-menu-link:hover,
+.site-menu-link:focus-visible {
+  background-color: var(--c-primary-soft);
+}
+
+.site-menu-link-label {
+  font-size: 0.75rem;
+  color: var(--c-ink-soft);
+}
+
+.site-menu-link-text {
+  font-size: 0.9375rem;
+  font-weight: 800;
   color: var(--c-primary-hover);
   text-decoration: underline;
   text-underline-offset: 0.2em;
-  overflow-wrap: anywhere;
 }
 
 .contact-card {

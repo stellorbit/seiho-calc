@@ -30,13 +30,54 @@ const contacts = [
       <p class="contact-note">※制度や受給可否に関するご相談は、お住まいの自治体の生活保護担当部署へお問い合わせください。</p>
     </section>
   ) : (
-    <nav class="contact-inline" aria-label="サイトに関するお問い合わせ先">
-      <span class="contact-inline-label">サイトに関するお問い合わせ:</span>
-      {contacts.map((c) => (
-        <a class="contact-inline-link" href={c.url} target="_blank" rel="noopener noreferrer">
-          {c.label}（{c.text}）
-        </a>
-      ))}
+    <nav class="site-nav" aria-label="サイトメニュー">
+      <div class="site-nav-inner">
+        <span class="site-nav-title">生活保護受給額シミュレーター</span>
+        <details class="site-menu">
+          <summary class="site-menu-button">
+            <span>お問い合わせ</span>
+            <span class="site-menu-caret" aria-hidden="true">▾</span>
+          </summary>
+          <ul class="site-menu-list">
+            {contacts.map((c) => (
+              <li>
+                <a class="site-menu-link" href={c.url} target="_blank" rel="noopener noreferrer">
+                  <span class="site-menu-link-label">{c.label}</span>
+                  <span class="site-menu-link-text">{c.text}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </details>
+      </div>
     </nav>
   )
 }
+
+<script>
+  // メニューを外側のクリック・Escキー・リンク選択で閉じる（外部通信・保存なし）
+  const menus = document.querySelectorAll<HTMLDetailsElement>('.site-menu');
+
+  document.addEventListener('click', (event) => {
+    menus.forEach((menu) => {
+      if (menu.open && !menu.contains(event.target as Node)) menu.open = false;
+    });
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape') return;
+    menus.forEach((menu) => {
+      if (!menu.open) return;
+      menu.open = false;
+      menu.querySelector('summary')?.focus();
+    });
+  });
+
+  menus.forEach((menu) => {
+    menu.querySelectorAll('a').forEach((link) => {
+      link.addEventListener('click', () => {
+        menu.open = false;
+      });
+    });
+  });
+</script>
