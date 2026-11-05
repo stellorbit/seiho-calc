@@ -91,6 +91,12 @@
     </div>
     <p class="section-desc">世帯員全員の年齢と、お持ちの障害者手帳・年金等級を選択してください。</p>
 
+    <div class="form-group calc-month-group">
+      <label for="calc-month-input" class="form-label">試算する年月</label>
+      <input type="month" id="calc-month-input" class="form-input" min="2026-10" aria-describedby="calc-month-hint" />
+      <p class="input-hint" id="calc-month-hint">※この月の1日時点で、生年月日から児童（18歳の年度末まで）・3歳未満等を判定します。12月は期末一時扶助を加算します。</p>
+    </div>
+
     <!-- 警告・催促メッセージバナー（セクション②に統合） -->
     <div id="calc-status-alert" class="calc-status-alert" role="alert" style="display: none;">
       <span class="status-alert-icon" aria-hidden="true">⚠️</span>
@@ -112,7 +118,7 @@
         <input type="checkbox" id="is-single-parent" class="custom-checkbox" />
         <span class="checkbox-label-text">ひとり親世帯（母子世帯・父子世帯）に該当する</span>
       </label>
-      <p class="checkbox-note">※18歳以下の子と同居している場合に「母子加算」が適用されます。</p>
+      <p class="checkbox-note">※世帯主（1人目）が、18歳の年度末までの子（障害のある子は20歳未満）を養育している場合に「母子加算」が適用されます。</p>
     </div>
   </section>
 

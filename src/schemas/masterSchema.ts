@@ -71,6 +71,35 @@ export const CriteriaSchema = z.object({
       typeB: yen,
     })
   ),
+  severeDisabilityAddition: yen,
+  familyCareAddition: yen,
+  pregnancyAddition: z.record(
+    MajorGradeSchema,
+    z.object({
+      pregnantUnder6: yen,
+      pregnant6Plus: yen,
+      postpartum: yen,
+    })
+  ),
+  childCareTransitionalPerChild: yen,
+  // 母子加算に係る経過的加算（3人以上の世帯で児童が1人の場合）。'5' は5人以上の世帯
+  singleParentTransitional: z.record(
+    z.enum(['3', '4', '5']),
+    z.array(
+      z.object({
+        minAge: z.number().int().nonnegative(),
+        maxAge: z.number().int().nonnegative(),
+        amounts: z.record(GradeSchema, yen),
+      })
+    )
+  ),
+  yearEndAllowance: z.record(
+    GradeSchema,
+    z.object({
+      byMembers: z.record(MembersUpTo9Schema, yen),
+      perPersonOver9: yen,
+    })
+  ),
 });
 
 export type Criteria = z.infer<typeof CriteriaSchema>;

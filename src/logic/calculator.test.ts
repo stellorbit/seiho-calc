@@ -291,6 +291,89 @@ describe('加算（告示 別表第1 第2章・令和8年10月）', () => {
   });
 });
 
+describe('追加の加算・期末一時扶助・年度末判定（告示 別表第1）', () => {
+  type Member = CalculationInput['members'][number];
+  const p = (id: string, age: number | null, extra: Partial<Member> = {}): Member => ({ id, age, disabilityDetail: 'none', ...extra });
+  const calc = (members: Member[], extra: Partial<CalculationInput> = {}) =>
+    calculateWelfare({ grade: '1-1', members, isSingleParent: false, feePaymentType: 'separate', ...extra }, standardTokyoLimits);
+
+  it('妊産婦加算は1・2級地同額、3級地別額で算定されること', () => {
+    expect(calc([p('1', 30, { pregnancyStatus: 'pregnant_under6' })]).additions.pregnancyAddition).toBe(9350);
+    expect(calc([p('1', 30, { pregnancyStatus: 'pregnant_6plus' })], { grade: '2-1' }).additions.pregnancyAddition).toBe(14120);
+    expect(calc([p('1', 30, { pregnancyStatus: 'postpartum' })], { grade: '3-2' }).additions.pregnancyAddition).toBe(7390);
+    expect(calc([p('1', 30, { pregnancyStatus: 'postpartum' })]).additions.totalAdditions).toBe(8690);
+  });
+
+  it('重度障害者加算16,560円・家族介護13,890円（家族介護は区分Aのみ）', () => {
+    const severe = calc([p('1', 50, { disabilityDetail: 'physical_1_2', severeCare: true })]);
+    expect(severe.additions.disabilityAddition).toBe(27460 + 16560);
+    expect(severe.additions.severeDisabilityCount).toBe(1);
+    const family = calc([p('1', 50, { disabilityDetail: 'physical_1_2', familyCare: true }), p('2', 48)]);
+    expect(family.additions.familyCareAddition).toBe(13890);
+    expect(family.additions.totalAdditions).toBe(27460 + 13890);
+    const familyB = calc([p('1', 50, { disabilityDetail: 'physical_3', familyCare: true }), p('2', 48)]);
+    expect(familyB.additions.familyCareAddition).toBe(0);
+  });
+
+  it('重複調整: 重度障害者加算を含めて比較し、家族介護は調整しないこと', () => {
+    const res = calc(
+      [p('1', 35, { disabilityDetail: 'physical_1_2', severeCare: true, familyCare: true }), p('2', 9)],
+      { isSingleParent: true }
+    );
+    expect(res.additions.disabilityAddition).toBe(27460 + 16560);
+    expect(res.additions.singleParentAddition).toBe(0);
+    expect(res.additions.familyCareAddition).toBe(13890);
+  });
+
+  it('期末一時扶助は12月のみ生活扶助に加算されること', () => {
+    const dec = calc([p('1', 30), p('2', 30)], { calcMonth: '2026-12' });
+    const nov = calc([p('1', 30), p('2', 30)], { calcMonth: '2026-11' });
+    expect(dec.livelihoodStandard.yearEndAllowance).toBe(23640);
+    expect(dec.livelihoodStandard.finalLivelihoodAmount).toBe(nov.livelihoodStandard.finalLivelihoodAmount + 23640);
+    expect(nov.livelihoodStandard.yearEndAllowance).toBe(0);
+    const ten = calc(Array.from({ length: 10 }, (_, i) => p(String(i + 1), 30)), { grade: '3-2', calcMonth: '2026-12' });
+    expect(ten.livelihoodStandard.yearEndAllowance).toBe(29650 + 1350);
+  });
+
+  it('児童養育加算の経過的加算: 4人以上の世帯の3歳未満児、第3子以降の3歳以上・小学校修了前の児童', () => {
+    const four = calc([p('1', 35), p('2', 33), p('3', 6), p('4', 2)]);
+    expect(four.additions.childCareTransitionalCount).toBe(1);
+    expect(four.additions.childCareAddition).toBe(2 * 10190 + 4330);
+    const three = calc([p('1', 35), p('2', 6), p('3', 2)]);
+    expect(three.additions.childCareTransitionalCount).toBe(0);
+    const fifth = calc([p('1', 40), p('2', 38), p('3', 10), p('4', 8), p('5', 5)]);
+    expect(fifth.additions.childCareTransitionalCount).toBe(1);
+    expect(fifth.additions.childCareTransitional).toBe(4330);
+  });
+
+  it('母子加算の経過的加算: 3人以上の世帯で児童が1人の場合に世帯人員・年齢・級地別の額を加算すること', () => {
+    const res = calc([p('1', 35), p('2', 9), p('3', 65)], { isSingleParent: true });
+    expect(res.additions.singleParentTransitional).toBe(3330);
+    expect(res.additions.singleParentAddition).toBe(18800 + 3330);
+    expect(calc([p('1', 35), p('2', 9), p('3', 65)], { isSingleParent: true, grade: '2-2' }).additions.singleParentTransitional).toBe(0);
+    expect(calc([p('1', 35), p('2', 16), p('3', 65), p('4', 60)], { isSingleParent: true }).additions.singleParentTransitional).toBe(0);
+    expect(calc([p('1', 35), p('2', 9), p('3', 65), p('4', 60), p('5', 40)], { isSingleParent: true, grade: '3-2' }).additions.singleParentTransitional).toBe(2900);
+    // 世帯主の障害者加算（区分B 18,300円）＜ 母子加算＋経過的加算（22,130円）→ 母子加算を算定
+    const overlap = calc([p('1', 35, { disabilityDetail: 'physical_3' }), p('2', 9), p('3', 65)], { isSingleParent: true });
+    expect(overlap.additions.singleParentAddition).toBe(22130);
+    expect(overlap.additions.disabilityAddition).toBe(0);
+  });
+
+  it('生年月日がある場合は試算月1日時点で18歳の年度末を判定すること', () => {
+    const april1 = calc([p('1', 45), p('2', null, { birthDate: '2008-04-01' })], { calcMonth: '2026-10' });
+    expect(april1.additions.childCareCount).toBe(0);
+    expect(april1.additions.birthDateUsed).toBe(true);
+    const april2 = calc([p('1', 45), p('2', null, { birthDate: '2008-04-02' })], { calcMonth: '2026-10' });
+    expect(april2.additions.childCareCount).toBe(1);
+    // 生年月日から年齢（18歳）を算定し、第1類は18・19歳の区分を適用
+    expect(april2.livelihoodStandard.category1Sum).toBe(46930 + 46930);
+    // 試算月がない場合は生年月日を使わず年齢で判定（18歳は児童とみなす）
+    const fallback = calc([p('1', 45), p('2', 18, { birthDate: '2008-04-01' })]);
+    expect(fallback.additions.childCareCount).toBe(1);
+    expect(fallback.additions.birthDateUsed).toBe(false);
+  });
+});
+
 describe('生活扶助本体（世帯人員が多い場合・告示 別表第1 第1章）', () => {
   const adults = (n: number) => Array.from({ length: n }, (_, i) => ({ id: String(i + 1), age: 30, disabilityDetail: 'none' as const }));
 

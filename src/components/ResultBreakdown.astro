@@ -75,6 +75,10 @@
             <span>特例加算（月2,500円×<span id="res-special-count">1</span>人）:</span>
             <span>¥<span id="res-special-addition">0</span></span>
           </div>
+          <div class="detail-row" id="row-year-end" hidden>
+            <span>期末一時扶助（12月のみ）:</span>
+            <span>¥<span id="res-year-end">0</span></span>
+          </div>
         </div>
       </div>
 
@@ -92,19 +96,41 @@
             <span>児童養育加算（18歳以下 <span id="res-child-count">0</span>人）:</span>
             <span>¥<span id="res-child-care-addition">0</span></span>
           </div>
+          <div class="detail-row detail-sub" id="row-child-care-transitional" hidden>
+            <span>うち経過的加算（4,330円×<span id="res-child-care-transitional-count">0</span>人）:</span>
+            <span>¥<span id="res-child-care-transitional">0</span></span>
+          </div>
           <div class="detail-row">
             <span>母子加算（ひとり親世帯）:</span>
             <span>¥<span id="res-single-parent-addition">0</span></span>
+          </div>
+          <div class="detail-row detail-sub" id="row-single-parent-transitional" hidden>
+            <span>うち経過的加算:</span>
+            <span>¥<span id="res-single-parent-transitional">0</span></span>
           </div>
           <div class="detail-row">
             <span>障害者加算（該当 <span id="res-disability-count">0</span>名）:</span>
             <span>¥<span id="res-disability-addition">0</span></span>
           </div>
+          <div class="detail-row detail-sub" id="row-severe-disability" hidden>
+            <span>うち重度障害者加算（16,560円×<span id="res-severe-count">0</span>名）</span>
+          </div>
+          <div class="detail-row" id="row-family-care" hidden>
+            <span>障害者加算・家族介護（13,890円×<span id="res-family-care-count">0</span>名）:</span>
+            <span>¥<span id="res-family-care">0</span></span>
+          </div>
+          <div class="detail-row" id="row-pregnancy" hidden>
+            <span>妊産婦加算（該当 <span id="res-pregnancy-count">0</span>名）:</span>
+            <span>¥<span id="res-pregnancy">0</span></span>
+          </div>
           <p class="detail-note" id="res-overlap-note" hidden>
-            ※世帯主（1人目）が障害者加算と母子加算の両方に該当するため、いずれか高い方のみを算定しています（児童2人目以降の母子加算額は重複調整の対象外）。
+            ※世帯主（1人目）が障害者加算と母子加算の両方に該当するため、いずれか高い方のみを算定しています（家族介護と、児童2人目以降の母子加算額は重複調整の対象外）。
+          </p>
+          <p class="detail-note" id="res-age-basis-note">
+            ※児童は年齢のみで判定しています（18歳は年度末までとみなします）。生年月日を入力すると日付で判定します。
           </p>
           <p class="detail-note">
-            ※児童は年齢のみで判定しています（18歳は高校卒業年度の3月31日までが対象）。母子世帯等・児童養育に係る経過的加算、重度障害者加算、妊産婦加算等は試算に含みません。
+            ※介護人をつけるための費用、入院・施設入所中の方の基準、在宅患者加算等は試算に含みません。
           </p>
         </div>
       </div>
@@ -368,9 +394,20 @@
   .detail-row {
     display: flex;
     justify-content: space-between;
+    gap: 0.5rem;
     font-size: 0.8125rem;
     color: #475569;
     font-variant-numeric: tabular-nums;
+  }
+
+  .detail-row[hidden] {
+    display: none;
+  }
+
+  .detail-sub {
+    padding-left: 1rem;
+    font-size: 0.75rem;
+    color: #64748b;
   }
 
   .text-muted {

@@ -290,6 +290,57 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
         }
       }
 
+      /* 世帯員の詳細条件（任意） */
+      .member-details {
+        border-top: 1px dashed #cbd5e1;
+        padding-top: 0.5rem;
+      }
+
+      .member-details > summary {
+        cursor: pointer;
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: #1e3a8a;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+      }
+
+      .member-details-body {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+        padding-top: 0.5rem;
+      }
+
+      @media (min-width: 500px) {
+        .member-details-body {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      .member-check {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+        font-size: 0.8125rem;
+        line-height: 1.5;
+        color: #334155;
+        cursor: pointer;
+        overflow-wrap: anywhere;
+      }
+
+      .member-check input {
+        width: 1.125rem;
+        height: 1.125rem;
+        margin-top: 0.15rem;
+        flex-shrink: 0;
+      }
+
+      .member-check-wide {
+        grid-column: 1 / -1;
+      }
+
       /* フッター＆免責事項 */
       footer {
         margin-top: 3rem;
@@ -511,8 +562,9 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
     <!-- クライアントサイド計算スクリプト (Vanilla TypeScript) -->
     <script>
       import { calculateWelfare } from '../logic/calculator';
-      import type { CalculationInput, PersonInput, DisabilityDetailType, FeePaymentType } from '../logic/types';
+      import type { CalculationInput, PersonInput, DisabilityDetailType, FeePaymentType, PregnancyStatus } from '../logic/types';
       import type { Grade, WinterZone, HousingLimit } from '../schemas/masterSchema';
+      import { parseDate, parseMonthStart, ageAt } from '../logic/dateRules';
 
       // 初期世帯員データ
       let members: PersonInput[] = [
@@ -544,6 +596,29 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
       const membersList = document.getElementById('members-list') as HTMLElement;
       const btnAddMember = document.getElementById('btn-add-member') as HTMLButtonElement;
       const isSingleParentCheckbox = document.getElementById('is-single-parent') as HTMLInputElement;
+      const calcMonthInput = document.getElementById('calc-month-input') as HTMLInputElement;
+
+      // 試算する年月の初期値: 当月（基準の適用開始 2026-10 より前なら 2026-10）
+      (() => {
+        const now = new Date();
+        const current = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        calcMonthInput.value = current < calcMonthInput.min ? calcMonthInput.min : current;
+      })();
+
+      // 生年月日が入力されている世帯員は、試算月1日時点の満年齢を年齢欄に反映し、手入力を無効化する
+      function syncAgeFromBirth(m: PersonInput, ageInput: HTMLInputElement) {
+        const base = parseMonthStart(calcMonthInput.value);
+        const birth = parseDate(m.birthDate);
+        if (birth && base) {
+          m.age = ageAt(birth, base);
+          ageInput.value = String(m.age);
+          ageInput.disabled = true;
+          ageInput.title = '生年月日から自動計算しています';
+        } else {
+          ageInput.disabled = false;
+          ageInput.removeAttribute('title');
+        }
+      }
       
       const labelRent = document.getElementById('label-rent') as HTMLElement;
       const hintRent = document.getElementById('hint-rent') as HTMLElement;
@@ -570,6 +645,23 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
       const resSpecialAddition = document.getElementById('res-special-addition') as HTMLElement;
       const resTransitionalAddition = document.getElementById('res-transitional-addition') as HTMLElement;
       const resOverlapNote = document.getElementById('res-overlap-note') as HTMLElement;
+      const rowYearEnd = document.getElementById('row-year-end') as HTMLElement;
+      const resYearEnd = document.getElementById('res-year-end') as HTMLElement;
+      const rowChildCareTransitional = document.getElementById('row-child-care-transitional') as HTMLElement;
+      const resChildCareTransitional = document.getElementById('res-child-care-transitional') as HTMLElement;
+      const resChildCareTransitionalCount = document.getElementById('res-child-care-transitional-count') as HTMLElement;
+      const rowSingleParentTransitional = document.getElementById('row-single-parent-transitional') as HTMLElement;
+      const resSingleParentTransitional = document.getElementById('res-single-parent-transitional') as HTMLElement;
+      const rowSevere = document.getElementById('row-severe-disability') as HTMLElement;
+      const resSevereCount = document.getElementById('res-severe-count') as HTMLElement;
+      const rowFamilyCare = document.getElementById('row-family-care') as HTMLElement;
+      const resFamilyCare = document.getElementById('res-family-care') as HTMLElement;
+      const resFamilyCareCount = document.getElementById('res-family-care-count') as HTMLElement;
+      const rowPregnancy = document.getElementById('row-pregnancy') as HTMLElement;
+      const resPregnancy = document.getElementById('res-pregnancy') as HTMLElement;
+      const resPregnancyCount = document.getElementById('res-pregnancy-count') as HTMLElement;
+      const resAgeBasisNote = document.getElementById('res-age-basis-note') as HTMLElement;
+      const optionalRows = [rowYearEnd, rowChildCareTransitional, rowSingleParentTransitional, rowSevere, rowFamilyCare, rowPregnancy];
       const resTotalAdditions = document.getElementById('res-total-additions') as HTMLElement;
       const resChildCount = document.getElementById('res-child-count') as HTMLElement;
       const resChildCareAddition = document.getElementById('res-child-care-addition') as HTMLElement;
@@ -754,7 +846,7 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
 
           // 区分Aグループ
           const optGroupA = document.createElement('optgroup');
-          optGroupA.label = '区分Aに該当（高額加算：月約2.6万円）';
+          optGroupA.label = '区分Aに該当（月23,620〜27,460円）';
 
           const optPhyA = document.createElement('option');
           optPhyA.value = 'physical_1_2';
@@ -780,7 +872,7 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
 
           // 区分Bグループ
           const optGroupB = document.createElement('optgroup');
-          optGroupB.label = '区分Bに該当（一般加算：月約1.8万円）';
+          optGroupB.label = '区分Bに該当（月15,750〜18,300円）';
 
           const optPhyB = document.createElement('option');
           optPhyB.value = 'physical_3';
@@ -817,8 +909,120 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
           controls.appendChild(ageGroup);
           controls.appendChild(disGroup);
 
+          // 詳細条件（任意）: 生年月日・妊娠出産・重度障害・家族介護
+          const details = document.createElement('details');
+          details.className = 'member-details';
+          if (m.birthDate || (m.pregnancyStatus && m.pregnancyStatus !== 'none') || m.severeCare || m.familyCare) {
+            details.open = true;
+          }
+          const summary = document.createElement('summary');
+          summary.textContent = '詳細条件（任意）';
+          details.appendChild(summary);
+
+          const body = document.createElement('div');
+          body.className = 'member-details-body';
+
+          const birthGroup = document.createElement('div');
+          birthGroup.className = 'form-group';
+          const birthLabel = document.createElement('label');
+          birthLabel.className = 'form-label';
+          birthLabel.htmlFor = `birth-${m.id}`;
+          birthLabel.textContent = '生年月日';
+          const birthInput = document.createElement('input');
+          birthInput.type = 'date';
+          birthInput.id = `birth-${m.id}`;
+          birthInput.className = 'form-input';
+          birthInput.max = new Date().toISOString().slice(0, 10);
+          birthInput.value = m.birthDate ?? '';
+          const birthHint = document.createElement('p');
+          birthHint.className = 'input-hint';
+          birthHint.textContent = '入力すると年齢と、18歳の年度末・3歳未満等を日付で判定します。';
+          birthInput.addEventListener('change', (e) => {
+            const raw = (e.target as HTMLInputElement).value;
+            m.birthDate = parseDate(raw) ? raw : null;
+            syncAgeFromBirth(m, ageInput);
+            runCalculation();
+          });
+          birthGroup.appendChild(birthLabel);
+          birthGroup.appendChild(birthInput);
+          birthGroup.appendChild(birthHint);
+
+          const pregGroup = document.createElement('div');
+          pregGroup.className = 'form-group';
+          const pregLabel = document.createElement('label');
+          pregLabel.className = 'form-label';
+          pregLabel.htmlFor = `preg-${m.id}`;
+          pregLabel.textContent = '妊娠・出産（妊産婦加算）';
+          const pregSelect = document.createElement('select');
+          pregSelect.id = `preg-${m.id}`;
+          pregSelect.className = 'form-select';
+          const pregOptions: Array<[PregnancyStatus, string]> = [
+            ['none', '該当なし'],
+            ['pregnant_under6', '妊娠6か月未満（妊娠確認の翌月から）'],
+            ['pregnant_6plus', '妊娠6か月以上'],
+            ['postpartum', '出産後（出産月から6か月以内）'],
+          ];
+          for (const [value, label] of pregOptions) {
+            const opt = document.createElement('option');
+            opt.value = value;
+            opt.textContent = label;
+            pregSelect.appendChild(opt);
+          }
+          pregSelect.value = m.pregnancyStatus ?? 'none';
+          pregSelect.addEventListener('change', (e) => {
+            m.pregnancyStatus = (e.target as HTMLSelectElement).value as PregnancyStatus;
+            runCalculation();
+          });
+          const pregHint = document.createElement('p');
+          pregHint.className = 'input-hint';
+          pregHint.textContent = '保護受給中に出産した場合、出産月は妊婦の額、翌月から5か月以内が産婦の額です。';
+          pregGroup.appendChild(pregLabel);
+          pregGroup.appendChild(pregSelect);
+          pregGroup.appendChild(pregHint);
+
+          const makeCheck = (id: string, text: string, checked: boolean, onChange: (v: boolean) => void) => {
+            const label = document.createElement('label');
+            label.className = 'member-check member-check-wide';
+            label.htmlFor = id;
+            const input = document.createElement('input');
+            input.type = 'checkbox';
+            input.id = id;
+            input.checked = checked;
+            input.addEventListener('change', () => {
+              onChange(input.checked);
+              runCalculation();
+            });
+            const span = document.createElement('span');
+            span.textContent = text;
+            label.appendChild(input);
+            label.appendChild(span);
+            return label;
+          };
+
+          const severeCheck = makeCheck(
+            `severe-${m.id}`,
+            '重度障害者加算: 特別児童扶養手当等施行令別表第1に定める程度の障害で、日常生活で常時の介護が必要（障害児入所施設・特別養護老人ホーム等の入所者を除く）',
+            !!m.severeCare,
+            (v) => { m.severeCare = v; }
+          );
+          const familyCheck = makeCheck(
+            `family-${m.id}`,
+            '家族介護: 区分Aの障害により日常生活の全てに介護が必要で、同じ世帯の人が介護している',
+            !!m.familyCare,
+            (v) => { m.familyCare = v; }
+          );
+
+          body.appendChild(birthGroup);
+          body.appendChild(pregGroup);
+          body.appendChild(severeCheck);
+          body.appendChild(familyCheck);
+          details.appendChild(body);
+
+          syncAgeFromBirth(m, ageInput);
+
           card.appendChild(header);
           card.appendChild(controls);
+          card.appendChild(details);
 
           membersList.appendChild(card);
         });
@@ -897,6 +1101,7 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
           resSpecialAddition.textContent = '-';
           resTransitionalAddition.textContent = '-';
           resOverlapNote.hidden = true;
+          optionalRows.forEach((row) => { row.hidden = true; });
 
           resTotalAdditions.textContent = '-';
           resChildCount.textContent = '-';
@@ -936,6 +1141,7 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
           commonServiceFee: parsedFee,
           feePaymentType,
           winterZone: currentWinterZone,
+          calcMonth: calcMonthInput.value || null,
         };
 
         const res = calculateWelfare(input, muni.housingLimit);
@@ -963,6 +1169,8 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
         resSpecialCount.textContent = String(members.length);
         resSpecialAddition.textContent = res.livelihoodStandard.temporarySpecialAddition.toLocaleString();
         resTransitionalAddition.textContent = res.livelihoodStandard.transitionalAddition.toLocaleString();
+        rowYearEnd.hidden = res.livelihoodStandard.yearEndAllowance === 0;
+        resYearEnd.textContent = res.livelihoodStandard.yearEndAllowance.toLocaleString();
 
         // 各種加算
         resTotalAdditions.textContent = res.additions.totalAdditions.toLocaleString();
@@ -974,6 +1182,24 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
         resDisabilityCount.textContent = String(totalDisCount);
         resDisabilityAddition.textContent = res.additions.disabilityAddition.toLocaleString();
         resOverlapNote.hidden = !res.additions.overlapAdjusted;
+
+        const a = res.additions;
+        rowChildCareTransitional.hidden = a.childCareTransitional === 0;
+        resChildCareTransitional.textContent = a.childCareTransitional.toLocaleString();
+        resChildCareTransitionalCount.textContent = String(a.childCareTransitionalCount);
+        rowSingleParentTransitional.hidden = a.singleParentTransitional === 0;
+        resSingleParentTransitional.textContent = a.singleParentTransitional.toLocaleString();
+        rowSevere.hidden = a.severeDisabilityCount === 0;
+        resSevereCount.textContent = String(a.severeDisabilityCount);
+        rowFamilyCare.hidden = a.familyCareCount === 0;
+        resFamilyCare.textContent = a.familyCareAddition.toLocaleString();
+        resFamilyCareCount.textContent = String(a.familyCareCount);
+        rowPregnancy.hidden = a.pregnancyCount === 0;
+        resPregnancy.textContent = a.pregnancyAddition.toLocaleString();
+        resPregnancyCount.textContent = String(a.pregnancyCount);
+        resAgeBasisNote.textContent = a.birthDateUsed
+          ? '※生年月日が入力された世帯員は、試算月1日時点で児童（18歳の年度末まで）・3歳未満・小学校修了前を判定しています。生年月日のない世帯員は年齢のみで判定しています。'
+          : '※児童は年齢のみで判定しています（18歳は年度末までとみなします）。生年月日を入力すると日付で判定します。';
 
         // 住宅扶助
         resHousingAmount.textContent = res.housingAssistance.approvedHousingAmount.toLocaleString();
@@ -1033,6 +1259,12 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
       });
 
       isSingleParentCheckbox.addEventListener('change', () => {
+        runCalculation();
+      });
+
+      calcMonthInput.addEventListener('change', () => {
+        // 試算月が変わると生年月日からの年齢も変わるため、世帯員カードを再描画する
+        renderMembers();
         runCalculation();
       });
 
