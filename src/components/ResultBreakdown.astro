@@ -31,7 +31,7 @@
 
     <div id="res-winter-hint" class="winter-hint-bar">
       <span class="winter-icon">❄️</span>
-      <span>冬季加算適用時（11月〜3月等の目安）: </span>
+      <span>冬季加算適用時（地区により10月〜翌4月のうち5〜7か月）: </span>
       <strong id="res-winter-total" class="winter-amount">¥0</strong> / 月
     </div>
   </div>
@@ -64,19 +64,16 @@
             <span>¥<span id="res-cat2">0</span></span>
           </div>
           <div class="detail-row">
-            <span>基礎額（10円未満切上）:</span>
+            <span>経過的加算（世帯員ごとの合算）:</span>
+            <span>¥<span id="res-transitional-addition">0</span></span>
+          </div>
+          <div class="detail-row">
+            <span>基準生活費（10円未満切上）:</span>
             <span>¥<span id="res-base-amount">0</span></span>
           </div>
           <div class="detail-row">
-            <span>臨時特例加算（月2,500円×<span id="res-special-count">1</span>人）:</span>
+            <span>特例加算（月2,500円×<span id="res-special-count">1</span>人）:</span>
             <span>¥<span id="res-special-addition">0</span></span>
-          </div>
-          <div class="detail-row">
-            <span>経過的加算:</span>
-            <span>¥<span id="res-transitional-addition">0</span></span>
-          </div>
-          <div class="detail-row text-muted">
-            <span>令和8年基準算定額: ¥<span id="res-calc-2026">0</span> / 従前保障額: ¥<span id="res-guaranteed">0</span></span>
           </div>
         </div>
       </div>
@@ -103,6 +100,12 @@
             <span>障害者加算（該当 <span id="res-disability-count">0</span>名）:</span>
             <span>¥<span id="res-disability-addition">0</span></span>
           </div>
+          <p class="detail-note" id="res-overlap-note" hidden>
+            ※世帯主（1人目）が障害者加算と母子加算の両方に該当するため、いずれか高い方のみを算定しています（児童2人目以降の母子加算額は重複調整の対象外）。
+          </p>
+          <p class="detail-note">
+            ※児童は年齢のみで判定しています（18歳は高校卒業年度の3月31日までが対象）。母子世帯等・児童養育に係る経過的加算、重度障害者加算、妊産婦加算等は試算に含みません。
+          </p>
         </div>
       </div>
 

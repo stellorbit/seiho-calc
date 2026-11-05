@@ -35,22 +35,22 @@ export interface CalculationResult {
     reductionRate: number;
     category1Reduced: number;
     category2: number;
-    baseAmount: number; // 10円未満切り上げ後
-    transitionalAddition: number;
-    temporarySpecialAddition: number;
-    calculated2026: number;
-    guaranteedAmount: number;
-    finalLivelihoodAmount: number;
+    transitionalAddition: number;      // 生活扶助本体に係る経過的加算（世帯員ごとの合算）
+    baseAmount: number;                // 第1類×逓減率＋第2類＋経過的加算（10円未満切り上げ後）
+    temporarySpecialAddition: number;  // 特例加算（世帯人員1人につき月額2,500円）
+    finalLivelihoodAmount: number;     // 生活扶助本体（baseAmount＋特例加算）
   };
   additions: {
     childCareAddition: number;
     childCareCount: number;
     singleParentAddition: number;
+    singleParentChildCount: number;
     disabilityAddition: number;
     disabilityTypeACount: number;
     disabilityTypeBCount: number;
-    winterAdditionEstimate: number; // 参考値
-    totalAdditions: number; // 冬季加算を除く定常加算合計
+    overlapAdjusted: boolean;          // 障害者加算と母子加算の重複調整を行ったか
+    winterAdditionEstimate: number;    // 冬季加算（地区別・世帯人員別。冬季のみ）
+    totalAdditions: number;            // 冬季加算を除く加算合計
   };
   housingAssistance: {
     limit: number;

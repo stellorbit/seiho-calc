@@ -569,8 +569,7 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
       const resSpecialCount = document.getElementById('res-special-count') as HTMLElement;
       const resSpecialAddition = document.getElementById('res-special-addition') as HTMLElement;
       const resTransitionalAddition = document.getElementById('res-transitional-addition') as HTMLElement;
-      const resCalc2026 = document.getElementById('res-calc-2026') as HTMLElement;
-      const resGuaranteed = document.getElementById('res-guaranteed') as HTMLElement;
+      const resOverlapNote = document.getElementById('res-overlap-note') as HTMLElement;
       const resTotalAdditions = document.getElementById('res-total-additions') as HTMLElement;
       const resChildCount = document.getElementById('res-child-count') as HTMLElement;
       const resChildCareAddition = document.getElementById('res-child-care-addition') as HTMLElement;
@@ -897,8 +896,7 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
           resSpecialCount.textContent = String(members.length);
           resSpecialAddition.textContent = '-';
           resTransitionalAddition.textContent = '-';
-          resCalc2026.textContent = '-';
-          resGuaranteed.textContent = '-';
+          resOverlapNote.hidden = true;
 
           resTotalAdditions.textContent = '-';
           resChildCount.textContent = '-';
@@ -965,8 +963,6 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
         resSpecialCount.textContent = String(members.length);
         resSpecialAddition.textContent = res.livelihoodStandard.temporarySpecialAddition.toLocaleString();
         resTransitionalAddition.textContent = res.livelihoodStandard.transitionalAddition.toLocaleString();
-        resCalc2026.textContent = res.livelihoodStandard.calculated2026.toLocaleString();
-        resGuaranteed.textContent = res.livelihoodStandard.guaranteedAmount.toLocaleString();
 
         // 各種加算
         resTotalAdditions.textContent = res.additions.totalAdditions.toLocaleString();
@@ -977,6 +973,7 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
         const totalDisCount = res.additions.disabilityTypeACount + res.additions.disabilityTypeBCount;
         resDisabilityCount.textContent = String(totalDisCount);
         resDisabilityAddition.textContent = res.additions.disabilityAddition.toLocaleString();
+        resOverlapNote.hidden = !res.additions.overlapAdjusted;
 
         // 住宅扶助
         resHousingAmount.textContent = res.housingAssistance.approvedHousingAmount.toLocaleString();

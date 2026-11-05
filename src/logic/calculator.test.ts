@@ -23,8 +23,10 @@ describe('生活保護費計算ロジック（令和8年10月改正基準・拡�
     expect(getAgeCategory(5)).toBe('3_5');
     expect(getAgeCategory(6)).toBe('6_11');
     expect(getAgeCategory(11)).toBe('6_11');
-    expect(getAgeCategory(12)).toBe('12_19');
-    expect(getAgeCategory(19)).toBe('12_19');
+    expect(getAgeCategory(12)).toBe('12_17');
+    expect(getAgeCategory(17)).toBe('12_17');
+    expect(getAgeCategory(18)).toBe('18_19');
+    expect(getAgeCategory(19)).toBe('18_19');
     expect(getAgeCategory(20)).toBe('20_40');
     expect(getAgeCategory(40)).toBe('20_40');
     expect(getAgeCategory(41)).toBe('41_59');
@@ -64,17 +66,19 @@ describe('生活保護費計算ロジック（令和8年10月改正基準・拡�
     };
 
     const res = calculateWelfare(input, standardTokyoLimits);
-    expect(res.livelihoodStandard.category1Sum).toBe(109030);
-    expect(res.livelihoodStandard.reductionRate).toBe(76);
-    expect(res.livelihoodStandard.category1Reduced).toBe(82862);
-    expect(res.livelihoodStandard.baseAmount).toBe(137510);
+    // 第1類: 46,930 + 46,930 + 44,580 = 138,440、逓減率0.75 → 103,830、第2類（3人）44,730
+    // 名古屋市公式資料（1級地-1・標準3人世帯）の「Ⅰ類＋Ⅱ類 148,560円」と一致
+    expect(res.livelihoodStandard.category1Sum).toBe(138440);
+    expect(res.livelihoodStandard.reductionRate).toBe(75);
+    expect(res.livelihoodStandard.category1Reduced).toBe(103830);
+    expect(res.livelihoodStandard.category2).toBe(44730);
+    expect(res.livelihoodStandard.transitionalAddition).toBe(0);
+    expect(res.livelihoodStandard.baseAmount).toBe(148560);
     expect(res.livelihoodStandard.temporarySpecialAddition).toBe(7500);
-    expect(res.livelihoodStandard.calculated2026).toBe(146010);
-    expect(res.livelihoodStandard.guaranteedAmount).toBe(155000);
-    expect(res.livelihoodStandard.finalLivelihoodAmount).toBe(155000);
+    expect(res.livelihoodStandard.finalLivelihoodAmount).toBe(156060);
     expect(res.additions.childCareAddition).toBe(10190);
     expect(res.housingAssistance.approvedHousingAmount).toBe(69800);
-    expect(res.totalBenefitMonthly).toBe(234990);
+    expect(res.totalBenefitMonthly).toBe(156060 + 10190 + 69800);
   });
 
   it('検証例2: 1級地-1 / 75歳夫婦（2人世帯）', () => {
@@ -90,9 +94,11 @@ describe('生活保護費計算ロジック（令和8年10月改正基準・拡�
     };
 
     const res = calculateWelfare(input, standardTokyoLimits);
-    expect(res.livelihoodStandard.finalLivelihoodAmount).toBe(120000);
+    // 39,890×2 = 79,780 × 0.87 = 69,408.6 ＋ 第2類 38,060 = 107,468.6 → 10円未満切上 107,470 ＋ 特例加算 5,000
+    expect(res.livelihoodStandard.baseAmount).toBe(107470);
+    expect(res.livelihoodStandard.finalLivelihoodAmount).toBe(112470);
     expect(res.housingAssistance.approvedHousingAmount).toBe(60000);
-    expect(res.totalBenefitMonthly).toBe(180000);
+    expect(res.totalBenefitMonthly).toBe(112470 + 60000);
   });
 
   it('検証例3: 1級地-1 / 65歳単身世帯', () => {
@@ -104,9 +110,11 @@ describe('生活保護費計算ロジック（令和8年10月改正基準・拡�
     };
 
     const res = calculateWelfare(input, standardTokyoLimits);
-    expect(res.livelihoodStandard.calculated2026).toBe(81040);
-    expect(res.livelihoodStandard.finalLivelihoodAmount).toBe(81040);
-    expect(res.totalBenefitMonthly).toBe(134740);
+    // 第1類 46,460 ＋ 第2類 27,790 ＋ 経過的加算（単身・65〜69歳・1級地-1）130 ＋ 特例加算 2,500
+    expect(res.livelihoodStandard.transitionalAddition).toBe(130);
+    expect(res.livelihoodStandard.baseAmount).toBe(74380);
+    expect(res.livelihoodStandard.finalLivelihoodAmount).toBe(76880);
+    expect(res.totalBenefitMonthly).toBe(76880 + 53700);
   });
 
   it('検証例4: 母子世帯（30代母＋小学生1人）＋児童養育加算＋母子加算', () => {
@@ -121,11 +129,13 @@ describe('生活保護費計算ロジック（令和8年10月改正基準・拡�
     };
 
     const res = calculateWelfare(input, standardTokyoLimits);
-    expect(res.livelihoodStandard.finalLivelihoodAmount).toBe(120000);
+    // 46,930 ＋ 46,460 = 93,390 × 0.87 ＋ 38,060 = 119,309.3 → 119,310（名古屋市公式資料の母子2人世帯「Ⅰ類＋Ⅱ類」と一致）
+    expect(res.livelihoodStandard.baseAmount).toBe(119310);
+    expect(res.livelihoodStandard.finalLivelihoodAmount).toBe(124310);
     expect(res.additions.childCareAddition).toBe(10190);
     expect(res.additions.singleParentAddition).toBe(18800);
     expect(res.additions.totalAdditions).toBe(28990);
-    expect(res.totalBenefitMonthly).toBe(212990);
+    expect(res.totalBenefitMonthly).toBe(124310 + 28990 + 64000);
   });
 
   it('検証例5: 障害詳細区分（精神手帳1級）および住宅扶助上限キャップ', () => {
@@ -139,24 +149,25 @@ describe('生活保護費計算ロジック（令和8年10月改正基準・拡�
     };
 
     const res = calculateWelfare(input, standardTokyoLimits);
-    expect(res.livelihoodStandard.finalLivelihoodAmount).toBe(85390);
-    expect(res.additions.disabilityAddition).toBe(26850);
+    // 46,930 ＋ 27,790 ＋ 経過的加算（単身・41〜59歳・1級地-1）20 ＝ 74,740 ＋ 特例加算 2,500
+    expect(res.livelihoodStandard.finalLivelihoodAmount).toBe(77240);
+    expect(res.additions.disabilityAddition).toBe(27460);
     expect(res.additions.disabilityTypeACount).toBe(1);
     expect(res.housingAssistance.approvedHousingAmount).toBe(53700);
     expect(res.housingAssistance.excessRent).toBe(16300); // 70000 - 53700
-    expect(res.totalBenefitMonthly).toBe(165940);
-    expect(res.additions.winterAdditionEstimate).toBe(2560);
-    expect(res.winterTotalBenefitMonthly).toBe(165940 + 2560);
+    expect(res.totalBenefitMonthly).toBe(77240 + 27460 + 53700);
+    expect(res.additions.winterAdditionEstimate).toBe(2630);
+    expect(res.winterTotalBenefitMonthly).toBe(77240 + 27460 + 53700 + 2630);
   });
 
   it('共益費ルール検証: 共益費別払いの場合、共益費は住宅扶助対象外（自己負担）となること', () => {
-    // 単身40歳 (生活扶助本体: 87,480円)
+    // 単身40歳 (生活扶助本体: 46,930 + 27,790 + 特例加算2,500 = 77,220円)
     // 純家賃: 48,000円 (上限53,700円以下)
     // 共益費: 4,000円（別払い）
     // 住宅扶助支給額: 48,000円
-    // 支給総額: 87,480 + 48,000 = 135,480円
+    // 支給総額: 77,220 + 48,000 = 125,220円
     // 自己負担共益費: 4,000円
-    // 実質手元生活費: 87,480 - 4,000 = 83,480円
+    // 実質手元生活費: 77,220 - 4,000 = 73,220円
     const input: CalculationInput = {
       grade: '1-1',
       members: [{ id: '1', age: 40, disabilityDetail: 'none' }],
@@ -169,15 +180,15 @@ describe('生活保護費計算ロジック（令和8年10月改正基準・拡�
     const res = calculateWelfare(input, standardTokyoLimits);
     expect(res.housingAssistance.approvedHousingAmount).toBe(48000);
     expect(res.housingAssistance.outOfPocketFee).toBe(4000);
-    expect(res.totalBenefitMonthly).toBe(87480 + 48000);
-    expect(res.effectiveLivingAllowance).toBe(87480 - 4000);
+    expect(res.totalBenefitMonthly).toBe(77220 + 48000);
+    expect(res.effectiveLivingAllowance).toBe(77220 - 4000);
   });
 
   it('共益費ルール検証: 共益費込契約で合計が上限以内の場合、全額が住宅扶助で支給されること', () => {
     // 純家賃: 48,000円 + 共益費込: 4,000円 = 合計52,000円 (上限53,700円以内)
     // 住宅扶助支給額: 52,000円
     // 自己負担共益費: 0円
-    // 実質手元生活費: 87,480円 (生活費が目減りしない)
+    // 実質手元生活費: 77,220円 (生活費が目減りしない)
     const input: CalculationInput = {
       grade: '1-1',
       members: [{ id: '1', age: 40, disabilityDetail: 'none' }],
@@ -191,7 +202,7 @@ describe('生活保護費計算ロジック（令和8年10月改正基準・拡�
     expect(res.housingAssistance.effectiveRentForHousingAssistance).toBe(52000);
     expect(res.housingAssistance.approvedHousingAmount).toBe(52000);
     expect(res.housingAssistance.outOfPocketFee).toBe(0);
-    expect(res.effectiveLivingAllowance).toBe(87480);
+    expect(res.effectiveLivingAllowance).toBe(77220);
   });
 
   it('共益費ルール検証: 共益費込契約で合計が上限を超える場合、上限額まで支給されること', () => {
@@ -210,7 +221,7 @@ describe('生活保護費計算ロジック（令和8年10月改正基準・拡�
     const res = calculateWelfare(input, standardTokyoLimits);
     expect(res.housingAssistance.approvedHousingAmount).toBe(53700);
     expect(res.housingAssistance.excessRent).toBe(2300);
-    expect(res.effectiveLivingAllowance).toBe(87480 - 2300);
+    expect(res.effectiveLivingAllowance).toBe(77220 - 2300);
   });
 
   it('エラー検証: 年齢が未入力（null）の場合は例外をスローすること', () => {
@@ -221,6 +232,96 @@ describe('生活保護費計算ロジック（令和8年10月改正基準・拡�
       feePaymentType: 'separate',
     };
     expect(() => calculateWelfare(input, standardTokyoLimits)).toThrow('年齢が未入力です');
+  });
+});
+
+describe('加算（告示 別表第1 第2章・令和8年10月）', () => {
+  const person = (id: string, age: number, disabilityDetail: CalculationInput['members'][number]['disabilityDetail'] = 'none') => ({ id, age, disabilityDetail });
+
+  it('母子加算・障害者加算は1・2・3級地の額で算定されること', () => {
+    const base = { isSingleParent: true, feePaymentType: 'separate' as const };
+    const twoChildren = [person('1', 35), person('2', 9), person('3', 6)];
+    const threeChildren = [...twoChildren, person('4', 3)];
+    expect(calculateWelfare({ ...base, grade: '1-2', members: twoChildren }, standardTokyoLimits).additions.singleParentAddition).toBe(18800 + 4800);
+    expect(calculateWelfare({ ...base, grade: '2-2', members: twoChildren }, standardTokyoLimits).additions.singleParentAddition).toBe(17400 + 4400);
+    expect(calculateWelfare({ ...base, grade: '3-1', members: threeChildren }, standardTokyoLimits).additions.singleParentAddition).toBe(16100 + 4100 + 2500);
+
+    const disabled = (grade: CalculationInput['grade'], detail: 'physical_1_2' | 'physical_3') =>
+      calculateWelfare({ grade, members: [person('1', 50, detail)], isSingleParent: false, feePaymentType: 'separate' }, standardTokyoLimits).additions.disabilityAddition;
+    expect(disabled('1-2', 'physical_1_2')).toBe(27460);
+    expect(disabled('2-1', 'physical_1_2')).toBe(25540);
+    expect(disabled('3-2', 'physical_1_2')).toBe(23620);
+    expect(disabled('1-1', 'physical_3')).toBe(18300);
+    expect(disabled('2-2', 'physical_3')).toBe(17020);
+    expect(disabled('3-1', 'physical_3')).toBe(15750);
+  });
+
+  it('世帯主が障害者加算と母子加算の両方に該当する場合は高い方のみ算定し、児童2人目以降の額は重複調整しないこと', () => {
+    const common = { grade: '1-1' as const, isSingleParent: true, feePaymentType: 'separate' as const };
+    // 区分A（27,460円）＞ 母子加算（18,800円）→ 障害者加算のみ
+    const a = calculateWelfare({ ...common, members: [person('1', 35, 'physical_1_2'), person('2', 9)] }, standardTokyoLimits);
+    expect(a.additions.disabilityAddition).toBe(27460);
+    expect(a.additions.singleParentAddition).toBe(0);
+    expect(a.additions.overlapAdjusted).toBe(true);
+    // 児童2人: 2人目の加算額4,800円は重複調整せず算定
+    const a2 = calculateWelfare({ ...common, members: [person('1', 35, 'physical_1_2'), person('2', 9), person('3', 6)] }, standardTokyoLimits);
+    expect(a2.additions.disabilityAddition).toBe(27460);
+    expect(a2.additions.singleParentAddition).toBe(4800);
+    // 区分B（18,300円）＜ 母子加算（18,800円）→ 母子加算のみ
+    const b = calculateWelfare({ ...common, members: [person('1', 35, 'physical_3'), person('2', 9)] }, standardTokyoLimits);
+    expect(b.additions.disabilityAddition).toBe(0);
+    expect(b.additions.singleParentAddition).toBe(18800);
+    expect(b.additions.overlapAdjusted).toBe(true);
+    // 児童側の障害者加算は重複調整の対象外
+    const c = calculateWelfare({ ...common, members: [person('1', 35), person('2', 9, 'physical_3')] }, standardTokyoLimits);
+    expect(c.additions.disabilityAddition).toBe(18300);
+    expect(c.additions.singleParentAddition).toBe(18800);
+    expect(c.additions.overlapAdjusted).toBe(false);
+  });
+
+  it('母子加算の児童には障害のある19歳を含め、児童養育加算は18歳以下のみとすること', () => {
+    const res = calculateWelfare(
+      { grade: '1-1', members: [person('1', 45), person('2', 19, 'physical_3')], isSingleParent: true, feePaymentType: 'separate' },
+      standardTokyoLimits
+    );
+    expect(res.additions.singleParentChildCount).toBe(1);
+    expect(res.additions.singleParentAddition).toBe(18800);
+    expect(res.additions.childCareCount).toBe(0);
+  });
+});
+
+describe('生活扶助本体（世帯人員が多い場合・告示 別表第1 第1章）', () => {
+  const adults = (n: number) => Array.from({ length: n }, (_, i) => ({ id: String(i + 1), age: 30, disabilityDetail: 'none' as const }));
+
+  it('7人世帯: 逓減率0.55・第2類58,920円・経過的加算（20〜40歳・1級地-1）2,810円/人', () => {
+    const res = calculateWelfare({ grade: '1-1', members: adults(7), isSingleParent: false, feePaymentType: 'separate', winterZone: 'I' }, standardTokyoLimits);
+    expect(res.livelihoodStandard.reductionRate).toBe(55);
+    expect(res.livelihoodStandard.category2).toBe(58920);
+    expect(res.livelihoodStandard.transitionalAddition).toBe(2810 * 7);
+    // 46,930×7 = 328,510 × 0.55 = 180,680.5 ＋ 58,920 ＋ 19,670 = 259,270.5 → 259,280
+    expect(res.livelihoodStandard.baseAmount).toBe(259280);
+    expect(res.livelihoodStandard.finalLivelihoodAmount).toBe(259280 + 2500 * 7);
+    expect(res.additions.winterAdditionEstimate).toBe(25360);
+  });
+
+  it('10人以上世帯: 第2類・冬季加算は9人の額に1人増すごとの額を加算すること', () => {
+    const res10 = calculateWelfare({ grade: '3-2', members: adults(10), isSingleParent: false, feePaymentType: 'separate', winterZone: 'VI' }, standardTokyoLimits);
+    expect(res10.livelihoodStandard.reductionRate).toBe(50);
+    expect(res10.livelihoodStandard.category2).toBe(64670 + 2760);
+    expect(res10.livelihoodStandard.transitionalAddition).toBe(360 * 10);
+    expect(res10.additions.winterAdditionEstimate).toBe(5560 + 180);
+    const res11 = calculateWelfare({ grade: '3-2', members: adults(11), isSingleParent: false, feePaymentType: 'separate', winterZone: 'VI' }, standardTokyoLimits);
+    expect(res11.livelihoodStandard.category2).toBe(64670 + 2760 * 2);
+    expect(res11.additions.winterAdditionEstimate).toBe(5560 + 180 * 2);
+  });
+
+  it('第2類・冬季加算は級地によらず同額であること', () => {
+    const r1 = calculateWelfare({ grade: '1-1', members: adults(2), isSingleParent: false, feePaymentType: 'separate', winterZone: 'III' }, standardTokyoLimits);
+    const r6 = calculateWelfare({ grade: '3-2', members: adults(2), isSingleParent: false, feePaymentType: 'separate', winterZone: 'III' }, standardTokyoLimits);
+    expect(r1.livelihoodStandard.category2).toBe(38060);
+    expect(r6.livelihoodStandard.category2).toBe(38060);
+    expect(r1.additions.winterAdditionEstimate).toBe(10590);
+    expect(r6.additions.winterAdditionEstimate).toBe(10590);
   });
 });
 

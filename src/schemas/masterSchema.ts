@@ -7,7 +7,8 @@ export const AgeCategorySchema = z.enum([
   '0_2',
   '3_5',
   '6_11',
-  '12_19',
+  '12_17',
+  '18_19',
   '20_40',
   '41_59',
   '60_64',
@@ -20,41 +21,55 @@ export type AgeCategory = z.infer<typeof AgeCategorySchema>;
 export const WinterZoneSchema = z.enum(['I', 'II', 'III', 'IV', 'V', 'VI']);
 export type WinterZone = z.infer<typeof WinterZoneSchema>;
 
+// 加算額の級地区分（1級地・2級地・3級地）
+export const MajorGradeSchema = z.enum(['1', '2', '3']);
+export type MajorGrade = z.infer<typeof MajorGradeSchema>;
+
+const yen = z.number().int().nonnegative();
+
+// 世帯人員キー: 逓減率・経過的加算は '1'〜'9' と '10'（10人以上）、第2類・冬季加算は '1'〜'9'
+const MembersUpTo10Schema = z.enum(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']);
+const MembersUpTo9Schema = z.enum(['1', '2', '3', '4', '5', '6', '7', '8', '9']);
+
 export const CriteriaSchema = z.object({
   revisionDate: z.string(),
-  temporarySpecialAdditionPerPerson: z.number().int().nonnegative(),
-  childCareAdditionPerChild: z.number().int().nonnegative(),
-  category1Standard: z.record(AgeCategorySchema, z.record(GradeSchema, z.number().int().nonnegative())),
-  reductionRates: z.record(z.string(), z.number().int().positive()),
-  category2Standard: z.record(z.string(), z.record(GradeSchema, z.number().int().nonnegative())),
-  transitionalAddition: z.record(z.string(), z.record(GradeSchema, z.number().int().nonnegative())),
-  guaranteedPreviousStandard: z.record(z.string(), z.record(GradeSchema, z.number().int().nonnegative())),
-  singleParentAddition: z.record(
-    GradeSchema,
+  source: z.object({
+    title: z.string(),
+    url: z.url(),
+    crossCheck: z.url(),
+  }),
+  temporarySpecialAdditionPerPerson: yen,
+  category1Standard: z.record(AgeCategorySchema, z.record(GradeSchema, yen)),
+  // 逓減率（百分率の整数）。'10' は10人以上
+  reductionRates: z.record(MembersUpTo10Schema, z.number().int().positive().max(100)),
+  category2Standard: z.object({
+    byMembers: z.record(MembersUpTo9Schema, yen),
+    perPersonOver9: yen,
+  }),
+  // 経過的加算（月額）: 世帯人員 × 年齢区分 × 級地。'10' は10人以上
+  transitionalAddition: z.record(MembersUpTo10Schema, z.record(AgeCategorySchema, z.record(GradeSchema, yen))),
+  winterAddition: z.record(
+    WinterZoneSchema,
     z.object({
-      oneChild: z.number().int().nonnegative(),
-      twoChildren: z.number().int().nonnegative(),
-      additionalPerChild: z.number().int().nonnegative(),
+      byMembers: z.record(MembersUpTo9Schema, yen),
+      perPersonOver9: yen,
+    })
+  ),
+  childCareAdditionPerChild: yen,
+  singleParentAddition: z.record(
+    MajorGradeSchema,
+    z.object({
+      oneChild: yen,
+      secondChild: yen,
+      perChildFromThird: yen,
     })
   ),
   disabilityAddition: z.record(
-    GradeSchema,
+    MajorGradeSchema,
     z.object({
-      typeA: z.number().int().nonnegative(),
-      typeB: z.number().int().nonnegative(),
+      typeA: yen,
+      typeB: yen,
     })
-  ),
-  winterAddition: z.record(
-    WinterZoneSchema,
-    z.record(
-      GradeSchema,
-      z.object({
-        single: z.number().int().nonnegative(),
-        two: z.number().int().nonnegative(),
-        three_to_five: z.number().int().nonnegative(),
-        six_plus: z.number().int().nonnegative(),
-      })
-    )
   ),
 });
 
