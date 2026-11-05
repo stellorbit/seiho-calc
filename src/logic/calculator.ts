@@ -1,4 +1,4 @@
-import type { Grade, AgeCategory, WinterZone, Criteria } from '../schemas/masterSchema';
+import type { Grade, AgeCategory, WinterZone, Criteria, HousingLimit } from '../schemas/masterSchema';
 import type { CalculationInput, CalculationResult, PersonInput, DisabilityDetailType } from './types';
 import rawCriteria from '../data/criteria_202610.json';
 
@@ -38,7 +38,7 @@ export function mapDisabilityToCategory(detail: DisabilityDetailType): 'none' | 
 
 export function calculateWelfare(
   input: CalculationInput,
-  housingLimits: { '1': number; '2': number; '3_5': number; '6_plus': number }
+  housingLimits: HousingLimit
 ): CalculationResult {
   const n = input.members.length;
   if (n <= 0) {
@@ -130,7 +130,8 @@ export function calculateWelfare(
   let housingLimit = housingLimits['1'];
   if (n === 2) housingLimit = housingLimits['2'];
   else if (n >= 3 && n <= 5) housingLimit = housingLimits['3_5'];
-  else if (n >= 6) housingLimit = housingLimits['6_plus'];
+  else if (n === 6) housingLimit = housingLimits['6'];
+  else if (n >= 7) housingLimit = housingLimits['7_plus'];
 
   // 純家賃サニタイズ
   let pureRent: number | null = null;

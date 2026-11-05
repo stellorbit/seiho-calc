@@ -471,7 +471,7 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
     <script>
       import { calculateWelfare } from '../logic/calculator';
       import type { CalculationInput, PersonInput, DisabilityDetailType, FeePaymentType } from '../logic/types';
-      import type { Grade, WinterZone } from '../schemas/masterSchema';
+      import type { Grade, WinterZone, HousingLimit } from '../schemas/masterSchema';
 
       // 初期世帯員データ
       let members: PersonInput[] = [
@@ -483,7 +483,7 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
         code: string;
         name: string;
         grade: Grade;
-        housingLimit: { '1': number; '2': number; '3_5': number; '6_plus': number };
+        housingLimit: HousingLimit;
       }> = [];
 
       let currentWinterZone: WinterZone = 'VI';
@@ -491,15 +491,8 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
       // 自治体キャッシュ
       const muniCache = new Map<string, any>();
 
-      // 標準フォールバック
-      const defaultHousingLimits = {
-        '1-1': { '1': 53700, '2': 64000, '3_5': 69800, '6_plus': 75000 },
-        '1-2': { '1': 46000, '2': 55000, '3_5': 59800, '6_plus': 65000 },
-        '2-1': { '1': 40000, '2': 48000, '3_5': 52000, '6_plus': 56000 },
-        '2-2': { '1': 36000, '2': 43000, '3_5': 47000, '6_plus': 51000 },
-        '3-1': { '1': 33000, '2': 40000, '3_5': 43000, '6_plus': 47000 },
-        '3-2': { '1': 29000, '2': 35000, '3_5': 38000, '6_plus': 41000 },
-      };
+      // 自治体データ取得失敗時の表示文言（推測値による計算は行わない）
+      const MUNI_LOAD_ERROR_MESSAGE = '自治体データを読み込めませんでした。ページを再読み込みしてください';
 
       // DOM参照
       const prefSelect = document.getElementById('pref-select') as HTMLSelectElement;
@@ -583,27 +576,13 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
           muniCache.set(prefCode, data);
           applyMuniData(data);
         } catch (err) {
-          console.warn('Fallback municipality loaded due to fetch error:', err);
-          const fallbackData = {
+          console.warn('Municipality data could not be loaded:', err);
+          applyMuniData({
             prefCode,
-            prefName: '選択自治体',
-            winterZone: 'VI' as WinterZone,
-            municipalities: [
-              {
-                code: `${prefCode}001`,
-                name: '代表自治体（標準1-1）',
-                grade: '1-1' as Grade,
-                housingLimit: defaultHousingLimits['1-1'],
-              },
-              {
-                code: `${prefCode}002`,
-                name: 'その他一般市（標準2-1）',
-                grade: '2-1' as Grade,
-                housingLimit: defaultHousingLimits['2-1'],
-              },
-            ],
-          };
-          applyMuniData(fallbackData);
+            prefName: '',
+            winterZone: currentWinterZone,
+            municipalities: [],
+          });
         }
       }
 
@@ -622,6 +601,13 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
 
         if (currentMunicipalities.length > 0) {
           muniSelect.selectedIndex = 0;
+        } else {
+          const opt = document.createElement('option');
+          opt.value = '';
+          opt.textContent = '読み込みに失敗しました';
+          opt.disabled = true;
+          opt.selected = true;
+          muniSelect.appendChild(opt);
         }
 
         updateGradeDisplay();
@@ -632,21 +618,15 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
         const code = muniSelect.value;
         const found = currentMunicipalities.find(m => m.code === code);
         if (found) return found;
-        if (currentMunicipalities.length > 0) return currentMunicipalities[0];
-        return {
-          code: '13001',
-          name: '特別区（23区）',
-          grade: '1-1' as Grade,
-          housingLimit: defaultHousingLimits['1-1'],
-        };
+        return currentMunicipalities[0] ?? null;
       }
 
       function updateGradeDisplay() {
         const muni = getSelectedMunicipality();
         if (currentMuniName) {
-          currentMuniName.textContent = muni.name;
+          currentMuniName.textContent = muni ? muni.name : '-';
         }
-        gradeBadge.textContent = `${muni.grade}級地`;
+        gradeBadge.textContent = muni ? `${muni.grade}級地` : '-';
         winterBadge.textContent = `${currentWinterZone}区`;
       }
 
@@ -827,9 +807,10 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
       function runCalculation() {
         if (members.length === 0) return;
 
-        // 年齢未入力チェック
-        let hasError = false;
-        let firstErrorMessage = '';
+        // 自治体データ未取得・年齢未入力チェック
+        const muniUnavailable = currentMunicipalities.length === 0;
+        let hasError = muniUnavailable;
+        let firstErrorMessage = muniUnavailable ? MUNI_LOAD_ERROR_MESSAGE : '';
 
         members.forEach((m, idx) => {
           const inputEl = document.getElementById(`age-${m.id}`) as HTMLInputElement | null;
@@ -862,7 +843,7 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
           resEffectiveLiving.textContent = '-';
           stickyTotalAmount.textContent = '-';
           stickyEffectiveAmount.textContent = '-';
-          stickyHouseholdDesc.textContent = `${members.length}人世帯 / 年齢未入力`;
+          stickyHouseholdDesc.textContent = `${members.length}人世帯 / ${muniUnavailable ? '自治体データ未取得' : '年齢未入力'}`;
           resWinterTotal.textContent = '-';
 
           resLivelihoodAmount.textContent = '-';
@@ -899,6 +880,7 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
         }
 
         const muni = getSelectedMunicipality();
+        if (!muni) return;
         const rentRaw = pureRentInput.value.trim();
         const parsedRent = rentRaw !== '' ? Number(rentRaw) : null;
 

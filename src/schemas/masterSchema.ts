@@ -64,7 +64,8 @@ export const HousingLimitSchema = z.object({
   '1': z.number().int().nonnegative(),
   '2': z.number().int().nonnegative(),
   '3_5': z.number().int().nonnegative(),
-  '6_plus': z.number().int().nonnegative(),
+  '6': z.number().int().nonnegative(),
+  '7_plus': z.number().int().nonnegative(),
 });
 export type HousingLimit = z.infer<typeof HousingLimitSchema>;
 

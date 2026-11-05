@@ -1,14 +1,20 @@
 import { describe, it, expect } from 'vitest';
 import { calculateWelfare, getAgeCategory, mapDisabilityToCategory } from './calculator';
 import type { CalculationInput } from './types';
+import type { HousingLimit } from '../schemas/masterSchema';
+import tokyoData from '../../public/data/municipalities/13.json';
+import aichiData from '../../public/data/municipalities/23.json';
+
+// 東京都 1級地（特別区）の住宅扶助限度額
+const standardTokyoLimits: HousingLimit = {
+  '1': 53700,
+  '2': 64000,
+  '3_5': 69800,
+  '6': 75000,
+  '7_plus': 83800,
+};
 
 describe('生活保護費計算ロジック（令和8年10月改正基準・拡張対応）', () => {
-  const standardTokyoLimits = {
-    '1': 53700,
-    '2': 64000,
-    '3_5': 69800,
-    '6_plus': 75000,
-  };
 
   it('年齢区分マッピングが正しいこと', () => {
     expect(getAgeCategory(0)).toBe('0_2');
@@ -215,5 +221,54 @@ describe('生活保護費計算ロジック（令和8年10月改正基準・拡�
       feePaymentType: 'separate',
     };
     expect(() => calculateWelfare(input, standardTokyoLimits)).toThrow('年齢が未入力です');
+  });
+});
+
+describe('住宅扶助限度額（自治体マスター・世帯人員別）', () => {
+  const findMuni = (data: { municipalities: Array<{ name: string; grade: string; housingLimit: HousingLimit }> }, name: string) => {
+    const muni = data.municipalities.find((m) => m.name === name);
+    if (!muni) throw new Error(`自治体が見つかりません: ${name}`);
+    return muni;
+  };
+
+  // 家賃未入力時は住宅扶助限度額がそのまま認定額として算出される
+  const housingFor = (limits: HousingLimit, memberCount: number) => {
+    const input: CalculationInput = {
+      grade: '1-1',
+      members: Array.from({ length: memberCount }, (_, i) => ({ id: String(i + 1), age: 40, disabilityDetail: 'none' as const })),
+      isSingleParent: false,
+      feePaymentType: 'separate',
+    };
+    return calculateWelfare(input, limits).housingAssistance.approvedHousingAmount;
+  };
+
+  it('名古屋市（1級地-1・指定都市）の限度額が世帯人員別に正しいこと', () => {
+    const nagoya = findMuni(aichiData, '名古屋市');
+    expect(nagoya.grade).toBe('1-1');
+    expect(housingFor(nagoya.housingLimit, 1)).toBe(37000);
+    expect(housingFor(nagoya.housingLimit, 2)).toBe(44000);
+    expect(housingFor(nagoya.housingLimit, 3)).toBe(48000);
+    expect(housingFor(nagoya.housingLimit, 5)).toBe(48000);
+    expect(housingFor(nagoya.housingLimit, 6)).toBe(52000);
+    expect(housingFor(nagoya.housingLimit, 7)).toBe(58000);
+    expect(housingFor(nagoya.housingLimit, 8)).toBe(58000);
+  });
+
+  it('中核市（一宮市）は市ごとの限度額、一般市は県の級地別限度額が適用されること', () => {
+    expect(findMuni(aichiData, '一宮市').housingLimit['3_5']).toBe(48100);
+    const anjo = findMuni(aichiData, '安城市');
+    expect(anjo.grade).toBe('2-2');
+    expect(anjo.housingLimit).toEqual({ '1': 37000, '2': 44000, '3_5': 48100, '6': 52000, '7_plus': 58000 });
+    const other = findMuni(aichiData, '上記以外の市町村（3級地-2）');
+    expect(other.housingLimit).toEqual({ '1': 36000, '2': 43000, '3_5': 46600, '6': 50000, '7_plus': 56000 });
+  });
+
+  it('同一都道府県の1級地-1と1級地-2は同額の限度額となること', () => {
+    const tokubetsuku = findMuni(tokyoData, '特別区（23区）');
+    const ome = findMuni(tokyoData, '青梅市');
+    expect(tokubetsuku.grade).toBe('1-1');
+    expect(ome.grade).toBe('1-2');
+    expect(ome.housingLimit).toEqual(tokubetsuku.housingLimit);
+    expect(tokubetsuku.housingLimit).toEqual(standardTokyoLimits);
   });
 });
