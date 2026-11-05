@@ -285,6 +285,103 @@ select:focus-visible {
   line-height: 1.65;
 }
 
+/* ---------- 問い合わせ先 ---------- */
+.contact-inline {
+  max-width: 44rem;
+  margin: 0.875rem auto 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.contact-inline-label {
+  font-weight: 700;
+  color: var(--c-ink);
+}
+
+.contact-inline-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-weight: 700;
+  color: var(--c-primary-hover);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  overflow-wrap: anywhere;
+}
+
+.contact-card {
+  background-color: var(--c-card);
+  border: 1px solid var(--c-line);
+  border-radius: var(--radius-m);
+  padding: 1.125rem 1.25rem;
+  margin-bottom: 1.25rem;
+  box-shadow: var(--shadow-card);
+}
+
+.contact-lead {
+  margin: 0 0 0.75rem;
+  line-height: 1.65;
+}
+
+.contact-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.625rem;
+}
+
+@media (min-width: 640px) {
+  .contact-list {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.contact-link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-height: 44px;
+  padding: 0.625rem 0.875rem;
+  background-color: var(--c-primary-soft);
+  border: 1.5px solid var(--c-primary-line);
+  border-radius: var(--radius-s);
+  text-decoration: none;
+  color: var(--c-ink);
+  overflow-wrap: anywhere;
+}
+
+.contact-link:hover {
+  border-color: var(--c-primary);
+  background-color: #f7d9c4;
+}
+
+.contact-link-label {
+  font-size: 0.8125rem;
+  color: var(--c-ink-soft);
+}
+
+.contact-link-text {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--c-primary-hover);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.contact-note {
+  margin: 0.75rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--c-ink-soft);
+  line-height: 1.6;
+}
+
 /* ---------- 生成AI利用クレジット ---------- */
 .ai-credit {
   background-color: var(--c-bg-soft);

@@ -11,7 +11,12 @@ const sources = import.meta.glob<string>(
 const entries = Object.entries(sources);
 
 // 許可する外部URL（リンク・メタ情報のみ。読み込みには使わない）
-const ALLOWED_URL_PREFIXES = ['https://seihocalc.stellorbit.net/', 'https://www.mhlw.go.jp/'];
+const ALLOWED_URL_PREFIXES = [
+  'https://seihocalc.stellorbit.net/',
+  'https://www.mhlw.go.jp/',
+  'https://stellorbit.net/contact/', // お問い合わせ先（リンクのみ）
+  'https://x.com/OnslaughtktnP', // X（リンクのみ）
+];
 
 describe('プライバシー保護の静的検査（外部通信・保存・動的HTML生成の禁止）', () => {
   it('検査対象のソースが取得できること', () => {
@@ -118,6 +123,9 @@ describe('プライバシー保護の静的検査（外部通信・保存・動�
     expect(all).toContain('シミュレーターの値はあくまで資料に基づく概算です。詳しくは各自治体への生活保護担当部署へお問い合わせください。');
     expect(all).toContain('生活保護は、最低生活の保障と自立の助長を図ることを目的として');
     expect(all).toContain('https://www.mhlw.go.jp/content/000988958.pdf');
+    expect(all).toContain('https://stellorbit.net/contact/');
+    expect(all).toContain('https://x.com/OnslaughtktnP');
+    expect(all).toContain('@OnslaughtktnP');
     expect(all).toContain('このサイトは、生成AIを利用して構成しております。');
     expect(all).toContain('データ収集・保守');
     expect(all).toContain('Claude Opus 5.5');

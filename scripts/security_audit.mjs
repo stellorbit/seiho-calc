@@ -28,8 +28,8 @@ const files = walk(distDir);
 const textFiles = files.filter((f) => /\.(html|js|mjs|css|json|svg|txt|xml)$/.test(f) && !f.includes(`${path.sep}data${path.sep}municipalities${path.sep}`));
 const rel = (f) => path.relative(distDir, f).replaceAll('\\', '/');
 
-// 外部リンクとして許可するホスト（リンク・メタ情報のみ）
-const allowedHosts = new Set(['seihocalc.stellorbit.net', 'www.mhlw.go.jp']);
+// 外部リンクとして許可するホスト（リンク・メタ情報のみ。読み込みや通信には使わない）
+const allowedHosts = new Set(['seihocalc.stellorbit.net', 'www.mhlw.go.jp', 'stellorbit.net', 'x.com']);
 const ALLOWED_ORIGIN_COUNT_NOTE = [...allowedHosts].join(', ');
 
 for (const file of textFiles) {

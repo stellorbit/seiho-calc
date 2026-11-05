@@ -1,0 +1,42 @@
+---
+// サイトに関する問い合わせ先（リンクのみ。入力内容は送信しない）
+interface Props {
+  variant?: 'header' | 'footer';
+}
+
+const { variant = 'header' } = Astro.props;
+
+const contacts = [
+  { label: 'お問い合わせフォーム', text: 'stellorbit.net/contact', url: 'https://stellorbit.net/contact/' },
+  { label: 'X（旧Twitter）', text: '@OnslaughtktnP', url: 'https://x.com/OnslaughtktnP' },
+];
+---
+
+{
+  variant === 'footer' ? (
+    <section class="contact-card" aria-labelledby="contact-title">
+      <h2 id="contact-title" class="notes-title">サイトに関するお問い合わせ</h2>
+      <p class="contact-lead">このサイトの内容・不具合・ご意見は、次のいずれかからご連絡ください。</p>
+      <ul class="contact-list">
+        {contacts.map((c) => (
+          <li>
+            <a class="contact-link" href={c.url} target="_blank" rel="noopener noreferrer">
+              <span class="contact-link-label">{c.label}</span>
+              <span class="contact-link-text">{c.text}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+      <p class="contact-note">※制度や受給可否に関するご相談は、お住まいの自治体の生活保護担当部署へお問い合わせください。</p>
+    </section>
+  ) : (
+    <nav class="contact-inline" aria-label="サイトに関するお問い合わせ先">
+      <span class="contact-inline-label">サイトに関するお問い合わせ:</span>
+      {contacts.map((c) => (
+        <a class="contact-inline-link" href={c.url} target="_blank" rel="noopener noreferrer">
+          {c.label}（{c.text}）
+        </a>
+      ))}
+    </nav>
+  )
+}
