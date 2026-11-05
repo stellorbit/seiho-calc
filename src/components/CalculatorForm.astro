@@ -207,49 +207,57 @@
   .form-container {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1.25rem;
   }
 
   .form-section {
-    background-color: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 0.75rem;
+    background-color: var(--c-card);
+    border: 1px solid var(--c-line);
+    border-radius: var(--radius-l);
     padding: 1.25rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    box-shadow: var(--shadow-card);
+  }
+
+  @media (min-width: 640px) {
+    .form-section {
+      padding: 1.5rem;
+    }
   }
 
   .section-header {
     display: flex;
     align-items: center;
-    gap: 0.625rem;
-    margin-bottom: 0.25rem;
+    gap: 0.75rem;
+    margin-bottom: 0.375rem;
   }
 
   .step-badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
+    flex-shrink: 0;
+    width: 2rem;
+    height: 2rem;
     border-radius: 50%;
-    background-color: #1d4ed8;
+    background-color: var(--c-primary);
     color: #ffffff;
-    font-weight: 700;
-    font-size: 0.875rem;
+    font-weight: 800;
+    font-size: 1rem;
   }
 
   .section-title {
-    font-size: 1.125rem;
-    font-weight: 700;
-    color: #0f172a;
+    font-size: 1.1875rem;
+    font-weight: 800;
+    color: var(--c-ink);
     margin: 0;
+    line-height: 1.4;
   }
 
   .section-desc {
-    font-size: 0.875rem;
-    color: #475569;
-    margin: 0 0 1rem 0;
-    line-height: 1.5;
+    font-size: 0.9375rem;
+    color: var(--c-ink-soft);
+    margin: 0 0 1rem;
+    line-height: 1.6;
   }
 
   .grid-2 {
@@ -268,63 +276,69 @@
     display: flex;
     flex-direction: column;
     gap: 0.375rem;
+    min-width: 0;
   }
 
   .mb-md {
     margin-bottom: 1.25rem;
   }
 
+  .calc-month-group {
+    margin-bottom: 1rem;
+  }
+
   .form-label {
     font-size: 0.9375rem;
-    font-weight: 600;
-    color: #1e293b;
+    font-weight: 700;
+    color: var(--c-ink);
     display: flex;
     align-items: center;
     gap: 0.375rem;
+    flex-wrap: wrap;
   }
 
   .required-badge {
     font-size: 0.6875rem;
-    background-color: #fee2e2;
-    color: #b91c1c;
-    padding: 0.125rem 0.375rem;
+    background-color: var(--c-danger-soft);
+    border: 1px solid var(--c-danger-line);
+    color: var(--c-danger);
+    padding: 0 0.375rem;
     border-radius: 0.25rem;
     font-weight: 700;
+    line-height: 1.6;
   }
 
   .form-select,
   .form-input {
     width: 100%;
-    min-height: 44px;
+    min-height: 46px;
     padding: 0.625rem 0.875rem;
+    font-family: inherit;
     font-size: 1rem;
-    color: #1e293b;
-    background-color: #f8fafc;
-    border: 1.5px solid #cbd5e1;
-    border-radius: 0.5rem;
-    box-sizing: border-box;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+    color: var(--c-ink);
+    background-color: #ffffff;
+    border: 1.5px solid var(--c-line-strong);
+    border-radius: var(--radius-s);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
 
   .form-select:focus,
   .form-input:focus {
     outline: none;
-    border-color: #1d4ed8;
-    background-color: #ffffff;
-    box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.15);
+    border-color: var(--c-primary);
+    box-shadow: var(--focus-ring);
   }
 
   .form-input:disabled {
-    background-color: #e2e8f0;
-    color: #94a3b8;
+    background-color: var(--c-bg-soft);
+    color: var(--c-ink-soft);
     cursor: not-allowed;
-    border-color: #cbd5e1;
   }
 
   .form-input.is-invalid {
-    border-color: #dc2626;
-    background-color: #fef2f2;
-    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+    border-color: var(--c-danger);
+    background-color: var(--c-danger-soft);
+    box-shadow: 0 0 0 3px rgba(163, 40, 31, 0.2);
   }
 
   .calc-status-alert {
@@ -333,12 +347,12 @@
     gap: 0.625rem;
     padding: 0.75rem 1rem;
     margin-bottom: 1rem;
-    background-color: #fff1f2;
-    border: 1.5px solid #fecdd3;
-    border-radius: 0.5rem;
-    color: #9f1239;
-    font-size: 0.875rem;
-    font-weight: 600;
+    background-color: var(--c-danger-soft);
+    border: 1.5px solid var(--c-danger-line);
+    border-radius: var(--radius-s);
+    color: var(--c-danger);
+    font-size: 0.9375rem;
+    font-weight: 700;
   }
 
   .status-alert-icon {
@@ -348,7 +362,7 @@
   }
 
   .status-alert-text {
-    line-height: 1.4;
+    line-height: 1.5;
   }
 
   .text-right {
@@ -362,46 +376,46 @@
   }
 
   .input-with-unit .form-input {
-    padding-right: 4.5rem;
+    padding-right: 5rem;
   }
 
   .input-unit {
     position: absolute;
     right: 0.875rem;
-    color: #64748b;
+    color: var(--c-ink-soft);
     font-size: 0.875rem;
     pointer-events: none;
   }
 
   .input-hint {
     font-size: 0.8125rem;
-    color: #64748b;
-    margin: 0.25rem 0 0 0;
-    line-height: 1.4;
+    color: var(--c-ink-soft);
+    margin: 0.25rem 0 0;
+    line-height: 1.55;
   }
 
   .grade-badge-container {
     margin-top: 1rem;
-    padding: 0.625rem 0.875rem;
-    background-color: #eff6ff;
-    border: 1px solid #bfdbfe;
-    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    background-color: var(--c-primary-soft);
+    border: 1px solid var(--c-primary-line);
+    border-radius: var(--radius-s);
     display: flex;
     align-items: center;
     flex-wrap: wrap;
     gap: 0.5rem;
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
   }
 
   .info-label {
-    color: #1e3a8a;
-    font-weight: 600;
+    color: var(--c-primary-hover);
+    font-weight: 700;
   }
 
   .muni-name-text {
-    color: #0f172a;
-    font-weight: 700;
-    font-size: 0.9375rem;
+    color: var(--c-ink);
+    font-weight: 800;
+    overflow-wrap: anywhere;
   }
 
   .ml-sm {
@@ -409,19 +423,19 @@
   }
 
   .badge-grade {
-    background-color: #1d4ed8;
+    background-color: var(--c-primary);
     color: #ffffff;
-    font-weight: 700;
-    padding: 0.125rem 0.5rem;
-    border-radius: 0.25rem;
+    font-weight: 800;
+    padding: 0 0.625rem;
+    border-radius: 0.375rem;
   }
 
   .badge-sub {
-    background-color: #3b82f6;
+    background-color: var(--c-green);
     color: #ffffff;
-    font-weight: 600;
-    padding: 0.125rem 0.5rem;
-    border-radius: 0.25rem;
+    font-weight: 700;
+    padding: 0 0.625rem;
+    border-radius: 0.375rem;
   }
 
   .members-list {
@@ -439,26 +453,27 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 44px;
+    min-height: 46px;
     padding: 0.5rem 1.25rem;
+    font-family: inherit;
     font-size: 0.9375rem;
-    font-weight: 600;
-    color: #1d4ed8;
-    background-color: #eff6ff;
-    border: 1.5px solid #bfdbfe;
-    border-radius: 0.5rem;
+    font-weight: 700;
+    color: var(--c-primary-hover);
+    background-color: var(--c-primary-soft);
+    border: 1.5px solid var(--c-primary-line);
+    border-radius: var(--radius-s);
     cursor: pointer;
     transition: background-color 0.15s ease, border-color 0.15s ease;
   }
 
   .btn-secondary:hover {
-    background-color: #dbeafe;
-    border-color: #93c5fd;
+    background-color: #f7d9c4;
+    border-color: var(--c-primary);
   }
 
   .btn-icon {
     font-size: 1.25rem;
-    font-weight: 700;
+    font-weight: 800;
     margin-right: 0.375rem;
     line-height: 1;
   }
@@ -466,52 +481,54 @@
   .single-parent-box {
     margin-top: 1.25rem;
     padding-top: 1rem;
-    border-top: 1px dashed #cbd5e1;
+    border-top: 1px dashed var(--c-line-strong);
   }
 
   .checkbox-container {
     display: flex;
     align-items: center;
-    min-height: 44px;
+    min-height: 46px;
     gap: 0.625rem;
     cursor: pointer;
   }
 
   .custom-checkbox {
-    width: 20px;
-    height: 20px;
+    width: 1.375rem;
+    height: 1.375rem;
+    flex-shrink: 0;
     cursor: pointer;
-    accent-color: #1d4ed8;
+    accent-color: var(--c-primary);
   }
 
   .checkbox-label-text {
     font-size: 0.9375rem;
-    font-weight: 600;
-    color: #1e293b;
+    font-weight: 700;
+    color: var(--c-ink);
   }
 
   .checkbox-note {
     font-size: 0.8125rem;
-    color: #64748b;
-    margin: 0.25rem 0 0 1.875rem;
+    color: var(--c-ink-soft);
+    margin: 0.25rem 0 0 2rem;
+    line-height: 1.55;
   }
 
   /* 共益費ルール注記 */
   .housing-rule-notice {
-    background-color: #fffbeb;
-    border: 1px solid #fde68a;
-    border-radius: 0.5rem;
+    background-color: var(--c-amber-soft);
+    border: 1px solid var(--c-amber-line);
+    border-radius: var(--radius-s);
     padding: 0.875rem 1rem;
     margin-bottom: 1.25rem;
-    font-size: 0.8125rem;
-    color: #92400e;
+    font-size: 0.875rem;
+    color: var(--c-amber-ink);
   }
 
   .notice-header {
     display: flex;
     align-items: center;
     gap: 0.375rem;
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
     margin-bottom: 0.375rem;
   }
 
@@ -520,11 +537,11 @@
     padding-left: 1.25rem;
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
-    line-height: 1.5;
+    gap: 0.375rem;
+    line-height: 1.6;
   }
 
-  /* ラジオタイルのスタイル */
+  /* ラジオタイル */
   .radio-tile-group {
     display: grid;
     grid-template-columns: 1fr;
@@ -543,40 +560,49 @@
     align-items: flex-start;
     gap: 0.75rem;
     padding: 0.875rem;
-    border: 1.5px solid #cbd5e1;
-    border-radius: 0.5rem;
-    background-color: #f8fafc;
+    border: 1.5px solid var(--c-line-strong);
+    border-radius: var(--radius-s);
+    background-color: #ffffff;
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
   }
 
   .radio-tile:hover {
-    border-color: #93c5fd;
-    background-color: #eff6ff;
+    border-color: var(--c-primary);
+    background-color: var(--c-primary-soft);
+  }
+
+  .radio-tile:has(.radio-input:checked) {
+    border-color: var(--c-primary);
+    background-color: var(--c-primary-soft);
+    box-shadow: inset 0 0 0 1px var(--c-primary);
   }
 
   .radio-input {
-    width: 20px;
-    height: 20px;
+    width: 1.375rem;
+    height: 1.375rem;
     margin-top: 0.125rem;
-    accent-color: #1d4ed8;
+    flex-shrink: 0;
+    accent-color: var(--c-primary);
   }
 
   .radio-content {
     display: flex;
     flex-direction: column;
     gap: 0.125rem;
+    min-width: 0;
   }
 
   .radio-title {
-    font-size: 0.875rem;
-    font-weight: 700;
-    color: #1e293b;
+    font-size: 0.9375rem;
+    font-weight: 800;
+    color: var(--c-ink);
   }
 
   .radio-desc {
-    font-size: 0.75rem;
-    color: #64748b;
-    line-height: 1.3;
+    font-size: 0.8125rem;
+    color: var(--c-ink-soft);
+    line-height: 1.45;
   }
 </style>
+

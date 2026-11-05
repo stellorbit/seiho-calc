@@ -1,0 +1,570 @@
+/*
+ * 生活保護受給額シミュレーター 共通テーマ
+ * - 暖色の柔らかなライトテーマ（目に優しい配色）／UDフォント優先／外部フォント・外部通信なし
+ * - 文字色と背景色のコントラスト比は WCAG AA（4.5:1）以上を目安に設定
+ */
+
+:root {
+  --c-bg: #fbf6ec;
+  --c-bg-soft: #f4ecdc;
+  --c-card: #fffdf8;
+  --c-ink: #2b2118;
+  --c-ink-soft: #5c4a3a;
+  --c-line: #e3d6bf;
+  --c-line-strong: #c9b48f;
+
+  --c-primary: #a8451d;
+  --c-primary-hover: #8c3814;
+  --c-primary-soft: #fbe9dc;
+  --c-primary-line: #efc3a5;
+
+  --c-green: #2f6b4f;
+  --c-green-soft: #e6f2ea;
+  --c-green-line: #b5d6c3;
+
+  --c-amber-soft: #fff1cc;
+  --c-amber-line: #e8b94a;
+  --c-amber-ink: #5a3b00;
+
+  --c-danger: #a3281f;
+  --c-danger-soft: #fdeceb;
+  --c-danger-line: #f0b9b4;
+
+  --radius-s: 0.5rem;
+  --radius-m: 0.875rem;
+  --radius-l: 1.25rem;
+  --shadow-card: 0 1px 2px rgba(90, 58, 30, 0.08), 0 4px 14px rgba(90, 58, 30, 0.06);
+  --focus-ring: 0 0 0 3px rgba(168, 69, 29, 0.3);
+
+  --font-ud: 'BIZ UDPGothic', 'BIZ UDPゴシック', 'Hiragino Kaku Gothic ProN', 'ヒラギノ角ゴ ProN W3', 'Noto Sans JP', 'Meiryo', 'メイリオ', sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: var(--c-bg);
+  color: var(--c-ink);
+  font-family: var(--font-ud);
+  font-size: 16px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  padding-bottom: 96px; /* 下部追従バー分の余白 */
+}
+
+a {
+  color: var(--c-primary);
+}
+
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 3px solid var(--c-primary);
+  outline-offset: 2px;
+}
+
+.container {
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+@media (min-width: 640px) {
+  .container {
+    padding: 1.5rem 1.5rem 2rem;
+  }
+}
+
+/* ---------- 上部の免責バー ---------- */
+.disclaimer-bar {
+  background-color: var(--c-amber-soft);
+  border-bottom: 2px solid var(--c-amber-line);
+  color: var(--c-amber-ink);
+}
+
+.disclaimer-bar-inner {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+.disclaimer-bar-icon {
+  flex-shrink: 0;
+  font-size: 1.125rem;
+  line-height: 1.5;
+}
+
+@media (min-width: 640px) {
+  .disclaimer-bar-inner {
+    padding: 0.75rem 1.5rem;
+    justify-content: center;
+    text-align: center;
+  }
+}
+
+/* ---------- ヒーロー ---------- */
+.hero {
+  padding: 1.5rem 0 1rem;
+  text-align: center;
+}
+
+.hero-badge {
+  display: inline-block;
+  background-color: var(--c-primary-soft);
+  border: 1px solid var(--c-primary-line);
+  color: var(--c-primary-hover);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  padding: 0.25rem 0.875rem;
+  border-radius: 9999px;
+  margin-bottom: 0.75rem;
+}
+
+.hero-title {
+  font-size: clamp(1.25rem, 5.6vw, 1.625rem);
+  font-weight: 800;
+  line-height: 1.35;
+  text-wrap: balance;
+  margin: 0 0 0.75rem;
+  color: var(--c-ink);
+  letter-spacing: 0.01em;
+}
+
+@media (min-width: 640px) {
+  .hero-title {
+    font-size: 2.25rem;
+  }
+}
+
+.hero-desc {
+  max-width: 44rem;
+  margin: 0 auto;
+  font-size: 0.9375rem;
+  color: var(--c-ink-soft);
+}
+
+.privacy-note {
+  max-width: 44rem;
+  margin: 1rem auto 0;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  background-color: var(--c-green-soft);
+  border: 1px solid var(--c-green-line);
+  border-radius: var(--radius-m);
+  color: #1f4a36;
+  text-align: left;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.privacy-note-icon {
+  flex-shrink: 0;
+  font-size: 1.125rem;
+  line-height: 1.4;
+}
+
+/* ---------- 厚労省の引用 ---------- */
+.quote-box {
+  margin: 1rem 0 1.5rem;
+  padding: 1.25rem 1.25rem 1rem;
+  background-color: var(--c-card);
+  border: 2px solid var(--c-primary);
+  border-radius: var(--radius-l);
+  box-shadow: var(--shadow-card);
+  position: relative;
+  overflow-wrap: anywhere;
+}
+
+.quote-label {
+  display: inline-block;
+  margin-bottom: 0.625rem;
+  padding: 0.125rem 0.75rem;
+  background-color: var(--c-primary);
+  color: #ffffff;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  border-radius: 9999px;
+}
+
+.quote-text {
+  margin: 0;
+  font-size: 1.0625rem;
+  font-weight: 800;
+  line-height: 1.85;
+  color: var(--c-ink);
+}
+
+@media (min-width: 640px) {
+  .quote-box {
+    padding: 1.5rem 1.75rem 1.25rem;
+  }
+
+  .quote-text {
+    font-size: 1.1875rem;
+  }
+}
+
+.quote-source {
+  margin: 0.875rem 0 0;
+  padding-top: 0.625rem;
+  border-top: 1px dashed var(--c-line-strong);
+  font-size: 0.8125rem;
+  color: var(--c-ink-soft);
+}
+
+/* ---------- メインレイアウト ---------- */
+.main-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 920px) {
+  .main-layout {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    align-items: start;
+    gap: 2rem;
+  }
+
+  .column-right {
+    position: sticky;
+    top: 1rem;
+  }
+}
+
+/* ---------- フッター・注意事項 ---------- */
+.site-footer {
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid var(--c-line);
+  font-size: 0.875rem;
+  color: var(--c-ink-soft);
+}
+
+.notes-card {
+  background-color: var(--c-card);
+  border: 1px solid var(--c-line);
+  border-radius: var(--radius-m);
+  padding: 1.125rem 1.25rem;
+  margin-bottom: 1.25rem;
+  box-shadow: var(--shadow-card);
+}
+
+.notes-title {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--c-ink);
+}
+
+.notes-list {
+  margin: 0;
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  line-height: 1.65;
+}
+
+/* ---------- 生成AI利用クレジット ---------- */
+.ai-credit {
+  background-color: var(--c-bg-soft);
+  border: 1px solid var(--c-line);
+  border-radius: var(--radius-m);
+  padding: 0.875rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.ai-credit-title {
+  margin: 0 0 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 800;
+  color: var(--c-ink);
+}
+
+.ai-credit-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.ai-credit-item {
+  background-color: var(--c-card);
+  border: 1px solid var(--c-line-strong);
+  border-radius: 9999px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--c-ink);
+}
+
+.ai-credit-item strong {
+  color: var(--c-primary-hover);
+}
+
+/* 上部の生成AI利用表示（免責バーの直下） */
+.ai-notice-bar {
+  background-color: var(--c-bg-soft);
+  border-bottom: 1px solid var(--c-line);
+  color: var(--c-ink);
+}
+
+.ai-notice-inner {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0.5rem 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem 0.875rem;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.ai-notice-lead {
+  font-weight: 700;
+}
+
+.ai-notice-item strong {
+  color: var(--c-primary-hover);
+}
+
+.copyright {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--c-ink-soft);
+}
+
+/* ---------- 世帯員カード（スクリプトが動的に生成） ---------- */
+.member-card {
+  background-color: var(--c-bg);
+  border: 1.5px solid var(--c-line);
+  border-radius: var(--radius-m);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.member-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.member-tag {
+  font-size: 0.9375rem;
+  font-weight: 800;
+  color: var(--c-primary-hover);
+}
+
+.btn-remove-member {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0.25rem 0.875rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--c-danger);
+  background-color: transparent;
+  border: 1.5px solid var(--c-danger-line);
+  border-radius: var(--radius-s);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.btn-remove-member:hover {
+  background-color: var(--c-danger-soft);
+}
+
+.member-controls {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.875rem;
+}
+
+@media (min-width: 520px) {
+  .member-controls {
+    grid-template-columns: 8.5rem 1fr;
+    gap: 1rem;
+  }
+}
+
+.member-details {
+  border-top: 1px dashed var(--c-line-strong);
+  padding-top: 0.25rem;
+}
+
+.member-details > summary {
+  cursor: pointer;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--c-primary-hover);
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+
+.member-details-body {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.875rem;
+  padding-top: 0.5rem;
+}
+
+@media (min-width: 520px) {
+  .member-details-body {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.member-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--c-ink);
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+
+.member-check input {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-top: 0.2rem;
+  flex-shrink: 0;
+  accent-color: var(--c-primary);
+}
+
+.member-check-wide {
+  grid-column: 1 / -1;
+}
+
+/* ---------- 下部追従サマリーバー ---------- */
+.bottom-sticky-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  background-color: var(--c-card);
+  border-top: 3px solid var(--c-primary);
+  box-shadow: 0 -6px 18px rgba(90, 58, 30, 0.14);
+  padding: 0.5rem 1rem calc(0.5rem + env(safe-area-inset-bottom, 0px));
+}
+
+.sticky-content {
+  max-width: 1080px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.sticky-label-group {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.sticky-title {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--c-ink);
+}
+
+.sticky-sub {
+  font-size: 0.75rem;
+  color: var(--c-ink-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sticky-amounts-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-shrink: 0;
+}
+
+.sticky-amount-group {
+  display: flex;
+  align-items: baseline;
+  gap: 0.125rem;
+}
+
+.sticky-currency {
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: var(--c-primary);
+}
+
+.sticky-amount {
+  font-size: 1.75rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--c-primary-hover);
+  line-height: 1.1;
+}
+
+.sticky-unit {
+  font-size: 0.75rem;
+  color: var(--c-ink-soft);
+}
+
+.sticky-effective-group {
+  display: none;
+}
+
+@media (min-width: 520px) {
+  .sticky-effective-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+
+  .sticky-effective-label {
+    font-size: 0.75rem;
+    color: var(--c-ink-soft);
+  }
+
+  .sticky-effective-val {
+    font-size: 1.125rem;
+    font-weight: 800;
+    color: var(--c-green);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

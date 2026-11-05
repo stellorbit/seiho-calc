@@ -1,0 +1,32 @@
+---
+import AiCredit from './AiCredit.astro';
+import QuoteBox from './QuoteBox.astro';
+---
+
+<div class="disclaimer-bar" role="note" aria-label="ご利用にあたっての重要なお知らせ">
+  <p class="disclaimer-bar-inner">
+    <span class="disclaimer-bar-icon" aria-hidden="true">⚠️</span>
+    <span>シミュレーターの値はあくまで資料に基づく概算です。詳しくは各自治体への生活保護担当部署へお問い合わせください。</span>
+  </p>
+</div>
+
+<AiCredit variant="compact" />
+
+<div class="container">
+  <header class="hero">
+    <div class="hero-badge">令和8年10月1日施行 改正基準対応</div>
+    <h1 class="hero-title">生活保護受給額シミュレーター</h1>
+    <p class="hero-desc">
+      全国自治体の最新級地・住宅扶助上限額、詳細な障害者手帳区分、共益費・管理費のルールに対応した受給見込額の試算ツールです。
+    </p>
+    <div class="privacy-note" role="note">
+      <span class="privacy-note-icon" aria-hidden="true">🔒</span>
+      <span>
+        <strong>プライバシー完全保護</strong>:
+        入力内容はお使いの端末のブラウザ内でのみ計算され、外部サーバーへの送信・保存は一切行われません。
+      </span>
+    </div>
+  </header>
+
+  <QuoteBox />
+</div>

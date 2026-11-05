@@ -2,8 +2,11 @@
 <!-- push verification: 2026-11-04 -->
 
 > **生成AI利用クレジット**
-> - **計画書作成**: Gemini 4 Argon
-> - **サイト作成**: Gemini 3.8 Flash
+> このサイトは、生成AIを利用して構成しております。
+> - **データ収集・保守**: Claude Opus 5.5
+> - **サイト作成**: Claude Sonnet 5.5
+> - **計画書作成（初版）**: Gemini 4 Argon
+> - **サイト作成（初版）**: Gemini 3.8 Flash
 
 令和8年（2026年）10月1日施行 改正生活保護基準（令和8年厚生労働省告示第245号準拠）に対応した、生活保護費（生活扶助＋住宅扶助＋各種加算）の受給見込額シミュレーターです。
 
@@ -85,6 +88,21 @@ pnpm run preview
 - 令和2年4月現在の一覧との差分は、令和3年4月に中核市へ移行した松本市・一宮市の追加のみです。令和4年度以降、限度額の改正および新たな中核市移行は確認されていません。
 - 名古屋市の1人・2人・3人世帯の限度額（37,000円・44,000円・48,000円）は、名古屋市公式資料「令和7年度（令和7年10月以降）の最低生活費（モデル世帯）」と一致することを確認済みです。それ以外の自治体の額は公式資料との個別照合を行っていません。
 - 単身世帯の床面積別限度額（床面積15㎡以下の減額）は未対応です。
+
+## デザインとプライバシー・セキュリティの方針
+
+- **デザイン**: 暖色の柔らかなライトテーマ。UDフォント（BIZ UDPゴシック → Noto Sans JP の順）を優先し、外部フォントは使いません。共通のスタイルは `src/styles/theme.css`、入力・結果のスタイルは各コンポーネントにあります。文字と背景のコントラスト比は4.5:1以上です。
+- **プライバシー（必須条件）**: 入力内容はブラウザ内でのみ計算し、送信・保存しません。通信は同一オリジンの静的ファイル（`/data/municipalities/*.json`）の取得のみです。`localStorage`・Cookie・解析タグ・外部CDN・外部フォントは使いません。
+- **表示の生成**: 利用者の入力をHTMLとして扱いません（`innerHTML` 等は使用禁止。表示は `textContent` と DOM API のみ）。
+- **配信ヘッダー**: `public/_headers` に CSP（`connect-src 'self'`・`form-action 'none'`・`frame-ancestors 'none'` 等）、HSTS、`X-Content-Type-Options`、`Referrer-Policy: no-referrer` などを設定しています。
+- **固定する仕組み**: `src/logic/privacy.test.ts`（ソースの静的検査）が `pnpm test` で、`scripts/security_audit.mjs`（ビルド成果物の監査）が `pnpm run audit:security` で上記を検査します。公開前に次の順で実行してください。
+
+```bash
+pnpm test
+pnpm build
+pnpm run audit:security
+pnpm audit
+```
 
 ## 免責事項
 

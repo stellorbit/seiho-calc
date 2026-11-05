@@ -1,0 +1,41 @@
+---
+// 生成AI利用クレジット（モデル名はここ1か所で管理する）
+interface Props {
+  variant?: 'full' | 'compact';
+}
+
+const { variant = 'full' } = Astro.props;
+
+const credits = [
+  { role: 'データ収集・保守', model: 'Claude Opus 5.5' },
+  { role: 'サイト作成', model: 'Claude Sonnet 5.5' },
+  { role: '計画書作成（初版）', model: 'Gemini 4 Argon' },
+  { role: 'サイト作成（初版）', model: 'Gemini 3.8 Flash' },
+];
+---
+
+{
+  variant === 'compact' ? (
+    <div class="ai-notice-bar" role="note" aria-label="生成AI利用クレジット">
+      <p class="ai-notice-inner">
+        <span class="ai-notice-lead">✨ このサイトは、生成AIを利用して構成しております。</span>
+        {credits.slice(0, 2).map((c) => (
+          <span class="ai-notice-item">
+            {c.role}：<strong>{c.model}</strong>
+          </span>
+        ))}
+      </p>
+    </div>
+  ) : (
+    <section class="ai-credit" aria-labelledby="ai-credit-title">
+      <h3 id="ai-credit-title" class="ai-credit-title">✨ 生成AI利用クレジット</h3>
+      <ul class="ai-credit-list">
+        {credits.map((c) => (
+          <li class="ai-credit-item">
+            {c.role}: <strong>{c.model}</strong>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}

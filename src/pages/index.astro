@@ -1,6 +1,9 @@
 ---
+import '../styles/theme.css';
+import SiteHeader from '../components/SiteHeader.astro';
 import CalculatorForm from '../components/CalculatorForm.astro';
 import ResultBreakdown from '../components/ResultBreakdown.astro';
+import AiCredit from '../components/AiCredit.astro';
 ---
 
 <!doctype html>
@@ -8,13 +11,14 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="description" content="生活保護費（生活扶助＋住宅扶助＋各種加算）の受給見込額を即時試算するシミュレーター。令和8年（2026年）10月改正基準対応・完全クライアントサイド演算でプライバシーを完全保護。" />
+    <meta name="description" content="生活保護費（生活扶助＋住宅扶助＋各種加算）の受給見込額を試算するシミュレーター。令和8年（2026年）10月改正基準対応。入力内容は端末のブラウザ内でのみ計算され、外部へ送信されません。値は資料に基づく概算です。" />
+    <meta name="theme-color" content="#fbf6ec" />
     <title>生活保護受給額シミュレーター（令和8年10月改正基準・全国詳細市町村対応）</title>
     <!-- OGP (Open Graph Protocol) / リンクカード設定 -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://seihocalc.stellorbit.net/" />
     <meta property="og:title" content="生活保護受給額シミュレーター（令和8年10月改正基準・全国詳細市町村対応）" />
-    <meta property="og:description" content="厚生労働省告示第245号（令和8年10月改正基準）完全準拠。全国市区町村・級地、住宅扶助（家賃・共益費）、冬季加算、各種障害・母子加算を完全クライアントサイドで即時自動試算。" />
+    <meta property="og:description" content="令和8年10月改正基準に基づく生活保護費の概算シミュレーター。全国市区町村の級地・住宅扶助上限額、各種加算に対応。入力内容は外部へ送信されません。" />
     <meta property="og:image" content="https://seihocalc.stellorbit.net/ogp.png" />
     <meta property="og:image:secure_url" content="https://seihocalc.stellorbit.net/ogp.png" />
     <meta property="og:image:width" content="1200" />
@@ -28,484 +32,20 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
     <meta name="twitter:domain" content="seihocalc.stellorbit.net" />
     <meta name="twitter:url" content="https://seihocalc.stellorbit.net/" />
     <meta name="twitter:title" content="生活保護受給額シミュレーター（令和8年10月改正基準・全国詳細市町村対応）" />
-    <meta name="twitter:description" content="厚生労働省告示第245号（令和8年10月改正基準）完全準拠。全国市区町村・級地、住宅扶助（家賃・共益費）、冬季加算、各種障害・母子加算を完全クライアントサイドで即時自動試算。" />
+    <meta name="twitter:description" content="令和8年10月改正基準に基づく生活保護費の概算シミュレーター。入力内容は外部へ送信されません。" />
     <meta name="twitter:image" content="https://seihocalc.stellorbit.net/ogp.png" />
 
     <!-- ファビコン -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
     <!-- セキュリティポリシー（外部通信遮断・Zero-Data Retention保護） -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self';" />
-    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none';" />
     <meta name="referrer" content="no-referrer" />
-    <!-- システムUDフォントスタック（外部通信ゼロ・完全自己完結） -->
-    <style is:global>
-      :root {
-        --color-bg: #f8fafc;
-        --color-card: #ffffff;
-        --color-text-main: #1e293b;
-        --color-text-muted: #64748b;
-        --color-primary: #1d4ed8;
-        --color-primary-hover: #1e40af;
-        --color-primary-light: #eff6ff;
-        --color-border: #cbd5e1;
-        --font-family-ud: 'BIZ UDPGothic', 'BIZ UDPゴシック', 'Hiragino Kaku Gothic ProN', 'ヒラギノ角ゴ ProN W3', 'Noto Sans JP', 'Meiryo', 'メイリオ', sans-serif;
-      }
-
-      * {
-        box-sizing: border-box;
-      }
-
-      body {
-        margin: 0;
-        padding: 0;
-        background-color: var(--color-bg);
-        color: var(--color-text-main);
-        font-family: var(--font-family-ud);
-        font-size: 16px;
-        line-height: 1.6;
-        -webkit-font-smoothing: antialiased;
-        padding-bottom: 90px; /* 下部追従バー分の余白 */
-      }
-
-      .container {
-        width: 100%;
-        max-width: 1024px;
-        margin: 0 auto;
-        padding: 1rem;
-      }
-
-      @media (min-width: 640px) {
-        .container {
-          padding: 2rem 1.5rem;
-        }
-      }
-
-      header {
-        margin-bottom: 2rem;
-        text-align: center;
-      }
-
-      .header-badge {
-        display: inline-block;
-        background-color: #dbeafe;
-        color: #1e40af;
-        font-size: 0.8125rem;
-        font-weight: 700;
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px;
-        margin-bottom: 0.5rem;
-      }
-
-      h1 {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #0f172a;
-        margin: 0 0 0.5rem 0;
-        line-height: 1.3;
-      }
-
-      @media (min-width: 640px) {
-        h1 {
-          font-size: 2rem;
-        }
-      }
-
-      .header-desc {
-        font-size: 0.9375rem;
-        color: var(--color-text-muted);
-        max-width: 680px;
-        margin: 0 auto;
-      }
-
-      .privacy-notice-box {
-        margin-top: 1rem;
-        padding: 0.75rem 1rem;
-        background-color: #ecfdf5;
-        border: 1px solid #a7f3d0;
-        border-radius: 0.5rem;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 0.8125rem;
-        color: #065f46;
-      }
-
-      .privacy-icon {
-        font-size: 1rem;
-      }
-
-      .welfare-right-box {
-        margin: 1rem auto 0;
-        max-width: 680px;
-        padding: 0.875rem 1.125rem;
-        background-color: #fffbeb;
-        border: 1px solid #fcd34d;
-        border-left: 4px solid #d97706;
-        border-radius: 0.5rem;
-        text-align: left;
-        color: #451a03;
-        overflow-wrap: anywhere;
-      }
-
-      .welfare-right-text {
-        margin: 0;
-        font-size: 0.9375rem;
-        font-weight: 700;
-        line-height: 1.75;
-      }
-
-      .welfare-right-source {
-        margin: 0.5rem 0 0;
-        font-size: 0.75rem;
-        color: #78350f;
-      }
-
-      .welfare-right-source a {
-        color: #92400e;
-        text-decoration: underline;
-      }
-
-      .ai-credit-box {
-        margin-top: 0.75rem;
-        padding: 0.4rem 0.875rem;
-        background-color: #f1f5f9;
-        border: 1px solid #cbd5e1;
-        border-radius: 9999px;
-        display: inline-flex;
-        align-items: center;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 0.5rem;
-        font-size: 0.8125rem;
-        color: #334155;
-      }
-
-      .ai-credit-label {
-        font-weight: 700;
-        color: #1e293b;
-        display: flex;
-        align-items: center;
-        gap: 0.25rem;
-      }
-
-      .ai-credit-items {
-        display: inline-flex;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 0.375rem;
-      }
-
-      .ai-pill {
-        background-color: #ffffff;
-        border: 1px solid #cbd5e1;
-        border-radius: 9999px;
-        padding: 0.125rem 0.5rem;
-        color: #1e293b;
-      }
-
-      .ai-pill strong {
-        color: #1d4ed8;
-      }
-
-      .footer-ai-credit {
-        text-align: center;
-        font-size: 0.8125rem;
-        color: #64748b;
-        margin-bottom: 0.625rem;
-      }
-
-      .footer-ai-credit strong {
-        color: #1e293b;
-      }
-
-      .main-layout {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 2rem;
-      }
-
-      @media (min-width: 900px) {
-        .main-layout {
-          grid-template-columns: 1.15fr 0.85fr;
-          align-items: start;
-        }
-      }
-
-      /* メンバーカード動的生成用スタイル */
-      .member-card {
-        background-color: #f8fafc;
-        border: 1.5px solid #e2e8f0;
-        border-radius: 0.5rem;
-        padding: 0.875rem;
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
-      }
-
-      .member-card-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-
-      .member-tag {
-        font-size: 0.875rem;
-        font-weight: 700;
-        color: #1e3a8a;
-      }
-
-      .btn-remove-member {
-        min-width: 44px;
-        min-height: 44px;
-        padding: 0.25rem 0.625rem;
-        font-size: 0.8125rem;
-        font-weight: 600;
-        color: #dc2626;
-        background-color: transparent;
-        border: 1px solid #fca5a5;
-        border-radius: 0.375rem;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        transition: background-color 0.15s ease;
-      }
-
-      .btn-remove-member:hover {
-        background-color: #fee2e2;
-      }
-
-      .member-controls {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 0.875rem;
-      }
-
-      @media (min-width: 500px) {
-        .member-controls {
-          grid-template-columns: 130px 1fr;
-          gap: 1rem;
-        }
-      }
-
-      /* 世帯員の詳細条件（任意） */
-      .member-details {
-        border-top: 1px dashed #cbd5e1;
-        padding-top: 0.5rem;
-      }
-
-      .member-details > summary {
-        cursor: pointer;
-        font-size: 0.875rem;
-        font-weight: 700;
-        color: #1e3a8a;
-        min-height: 44px;
-        display: flex;
-        align-items: center;
-      }
-
-      .member-details-body {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 0.75rem;
-        padding-top: 0.5rem;
-      }
-
-      @media (min-width: 500px) {
-        .member-details-body {
-          grid-template-columns: 1fr 1fr;
-        }
-      }
-
-      .member-check {
-        display: flex;
-        align-items: flex-start;
-        gap: 0.5rem;
-        font-size: 0.8125rem;
-        line-height: 1.5;
-        color: #334155;
-        cursor: pointer;
-        overflow-wrap: anywhere;
-      }
-
-      .member-check input {
-        width: 1.125rem;
-        height: 1.125rem;
-        margin-top: 0.15rem;
-        flex-shrink: 0;
-      }
-
-      .member-check-wide {
-        grid-column: 1 / -1;
-      }
-
-      /* フッター＆免責事項 */
-      footer {
-        margin-top: 3rem;
-        padding-top: 1.5rem;
-        border-top: 1px solid #e2e8f0;
-        font-size: 0.8125rem;
-        color: var(--color-text-muted);
-        line-height: 1.6;
-      }
-
-      .disclaimer-card {
-        background-color: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 0.5rem;
-        padding: 1rem;
-        margin-bottom: 1.5rem;
-      }
-
-      .disclaimer-title {
-        font-weight: 700;
-        color: #1e293b;
-        margin: 0 0 0.5rem 0;
-      }
-
-      .disclaimer-list {
-        margin: 0;
-        padding-left: 1.25rem;
-        display: flex;
-        flex-direction: column;
-        gap: 0.25rem;
-      }
-
-      .copyright {
-        text-align: center;
-        font-size: 0.75rem;
-      }
-
-      /* 下部追従サマリーバー */
-      .bottom-sticky-bar {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background-color: #0f172a;
-        color: #ffffff;
-        border-top: 2px solid #1d4ed8;
-        padding: 0.625rem 1rem;
-        box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
-        z-index: 1000;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        max-height: 72px;
-      }
-
-      .sticky-content {
-        max-width: 1024px;
-        margin: 0 auto;
-        width: 100%;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 0.5rem;
-      }
-
-      .sticky-label-group {
-        display: flex;
-        flex-direction: column;
-      }
-
-      .sticky-title {
-        font-size: 0.75rem;
-        color: #94a3b8;
-      }
-
-      .sticky-sub {
-        font-size: 0.6875rem;
-        color: #64748b;
-      }
-
-      .sticky-amounts-wrapper {
-        display: flex;
-        align-items: center;
-        gap: 1.25rem;
-      }
-
-      .sticky-amount-group {
-        display: flex;
-        align-items: baseline;
-        gap: 0.125rem;
-      }
-
-      .sticky-currency {
-        font-size: 1.125rem;
-        font-weight: 700;
-        color: #60a5fa;
-      }
-
-      .sticky-amount {
-        font-size: 1.625rem;
-        font-weight: 800;
-        font-variant-numeric: tabular-nums;
-        color: #ffffff;
-        line-height: 1;
-      }
-
-      .sticky-unit {
-        font-size: 0.75rem;
-        color: #94a3b8;
-      }
-
-      .sticky-effective-group {
-        display: none;
-      }
-
-      @media (min-width: 500px) {
-        .sticky-effective-group {
-          display: flex;
-          flex-direction: column;
-          align-items: flex-end;
-        }
-        .sticky-effective-label {
-          font-size: 0.6875rem;
-          color: #94a3b8;
-        }
-        .sticky-effective-val {
-          font-size: 1.125rem;
-          font-weight: 700;
-          color: #38bdf8;
-          font-variant-numeric: tabular-nums;
-        }
-      }
-    </style>
   </head>
   <body>
-    <div class="container">
-      <header>
-        <div class="header-badge">令和8年10月1日施行 改正基準対応</div>
-        <h1>生活保護受給額シミュレーター</h1>
-        <p class="header-desc">
-          全国自治体の最新級地・住宅扶助上限額、詳細な障害者手帳区分、共益費・管理費のルールに対応した即時受給試算ツールです。
-        </p>
-        <blockquote class="welfare-right-box" cite="https://www.mhlw.go.jp/content/000988958.pdf">
-          <p class="welfare-right-text">
-            生活保護は、最低生活の保障と自立の助長を図ることを目的として、その困窮の程度に応じ、必要な保護を行う制度です。<br />
-            また、生活保護の申請は国民の権利です。生活保護を必要とする可能性はどなたにもあるものですので、ためらわずに自治体までご相談ください。
-          </p>
-          <p class="welfare-right-source">
-            ※厚生労働省「<a href="https://www.mhlw.go.jp/content/000988958.pdf" target="_blank" rel="noopener noreferrer">生活保護制度の概要</a>」より引用
-          </p>
-        </blockquote>
-        <div class="privacy-notice-box" role="status">
-          <span class="privacy-icon">🔒</span>
-          <span><strong>プライバシー完全保護</strong>: 入力内容は端末のブラウザ内でのみ計算され、外部サーバーへの送信・保存は一切行われません。</span>
-        </div>
-        <div class="ai-credit-box" role="note" aria-label="生成AI利用クレジット">
-          <span class="ai-credit-label">✨ 生成AI利用クレジット:</span>
-          <div class="ai-credit-items">
-            <span class="ai-pill">計画書作成: <strong>Gemini 4 Argon</strong></span>
-            <span class="ai-pill">サイト作成: <strong>Gemini 3.8 Flash</strong></span>
-            <span class="ai-pill">データ修正・保守: <strong>Claude Opus 5.5</strong></span>
-          </div>
-        </div>
-      </header>
+    <SiteHeader />
 
+    <div class="container">
       <main class="main-layout">
         <!-- 入力フォームエリア -->
         <div class="column-left">
@@ -518,23 +58,20 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
         </div>
       </main>
 
-      <footer>
-        <div class="disclaimer-card">
-          <h4 class="disclaimer-title">ご利用上の注意・免責事項</h4>
-          <ul class="disclaimer-list">
-            <li>本シミュレーターによる試算結果は、令和8年厚生労働省告示第245号（改正生活保護基準）に基づく概算試算値です。</li>
+      <footer class="site-footer">
+        <section class="notes-card" aria-labelledby="notes-title">
+          <h2 id="notes-title" class="notes-title">ご利用上の注意・免責事項</h2>
+          <ul class="notes-list">
+            <li>シミュレーターの値はあくまで資料に基づく概算です。詳しくは各自治体への生活保護担当部署へお問い合わせください。</li>
+            <li>試算は、令和8年厚生労働省告示第245号（改正生活保護基準）による生活保護法による保護の基準と、厚生労働省の級地区分等の資料に基づく概算です。</li>
             <li>実際の生活保護費の受給可否および支給決定額は、お住まいの自治体を管轄する福祉事務所（生活援護課等）による調査・認定によって最終決定されます。</li>
             <li>共益費・管理費は原則として住宅扶助の対象外（生活費負担）ですが、契約上不可分で家賃に含まれている場合等の個別判断は福祉事務所にご相談ください。</li>
             <li>給与収入や年金収入等がある場合は、基礎控除等を差し引いた額が保護費から控除（収入認定）されます。</li>
-            <li>本ツールは完全クライアントサイド演算（Zero-Data Retention）で動作しており、入力された個人情報がインターネット経由で送信・保存されることはありません。</li>
+            <li>本ツールは入力内容をお使いの端末のブラウザ内でのみ処理し、インターネット経由で送信・保存することはありません。</li>
           </ul>
-        </div>
-        <div class="footer-ai-credit">
-          生成AI利用クレジット: 計画書作成 <strong>Gemini 4 Argon</strong> ｜ サイト作成 <strong>Gemini 3.8 Flash</strong> ｜ データ修正・保守 <strong>Claude Opus 5.5</strong>
-        </div>
-        <div class="copyright">
-          © 2026 生活保護費シミュレーター (Zero-Data Retention Architecture)
-        </div>
+        </section>
+        <AiCredit />
+        <p class="copyright">© 2026 生活保護費シミュレーター</p>
       </footer>
     </div>
 
@@ -723,7 +260,7 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
         currentMunicipalities = data.municipalities;
 
         // セレクトボックスのオプション更新
-        muniSelect.innerHTML = '';
+        muniSelect.replaceChildren();
         for (const m of currentMunicipalities) {
           const opt = document.createElement('option');
           opt.value = m.code;
@@ -764,7 +301,7 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
 
       // 世帯員カードのレンダリング
       function renderMembers() {
-        membersList.innerHTML = '';
+        membersList.replaceChildren();
         members.forEach((m, idx) => {
           const card = document.createElement('div');
           card.className = 'member-card';
@@ -801,7 +338,11 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
           const ageLabel = document.createElement('label');
           ageLabel.className = 'form-label';
           ageLabel.htmlFor = `age-${m.id}`;
-          ageLabel.innerHTML = '年齢 <span class="required-badge">必須</span>';
+          ageLabel.append('年齢 ');
+          const ageRequired = document.createElement('span');
+          ageRequired.className = 'required-badge';
+          ageRequired.textContent = '必須';
+          ageLabel.appendChild(ageRequired);
 
           const ageInput = document.createElement('input');
           ageInput.type = 'number';
