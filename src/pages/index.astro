@@ -135,6 +135,37 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
         font-size: 1rem;
       }
 
+      .welfare-right-box {
+        margin: 1rem auto 0;
+        max-width: 680px;
+        padding: 0.875rem 1.125rem;
+        background-color: #fffbeb;
+        border: 1px solid #fcd34d;
+        border-left: 4px solid #d97706;
+        border-radius: 0.5rem;
+        text-align: left;
+        color: #451a03;
+        overflow-wrap: anywhere;
+      }
+
+      .welfare-right-text {
+        margin: 0;
+        font-size: 0.9375rem;
+        font-weight: 700;
+        line-height: 1.75;
+      }
+
+      .welfare-right-source {
+        margin: 0.5rem 0 0;
+        font-size: 0.75rem;
+        color: #78350f;
+      }
+
+      .welfare-right-source a {
+        color: #92400e;
+        text-decoration: underline;
+      }
+
       .ai-credit-box {
         margin-top: 0.75rem;
         padding: 0.4rem 0.875rem;
@@ -401,6 +432,15 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
         <p class="header-desc">
           全国自治体の最新級地・住宅扶助上限額、詳細な障害者手帳区分、共益費・管理費のルールに対応した即時受給試算ツールです。
         </p>
+        <blockquote class="welfare-right-box" cite="https://www.mhlw.go.jp/content/000988958.pdf">
+          <p class="welfare-right-text">
+            生活保護は、最低生活の保障と自立の助長を図ることを目的として、その困窮の程度に応じ、必要な保護を行う制度です。<br />
+            また、生活保護の申請は国民の権利です。生活保護を必要とする可能性はどなたにもあるものですので、ためらわずに自治体までご相談ください。
+          </p>
+          <p class="welfare-right-source">
+            ※厚生労働省「<a href="https://www.mhlw.go.jp/content/000988958.pdf" target="_blank" rel="noopener noreferrer">生活保護制度の概要</a>」より引用
+          </p>
+        </blockquote>
         <div class="privacy-notice-box" role="status">
           <span class="privacy-icon">🔒</span>
           <span><strong>プライバシー完全保護</strong>: 入力内容は端末のブラウザ内でのみ計算され、外部サーバーへの送信・保存は一切行われません。</span>
@@ -410,6 +450,7 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
           <div class="ai-credit-items">
             <span class="ai-pill">計画書作成: <strong>Gemini 4 Argon</strong></span>
             <span class="ai-pill">サイト作成: <strong>Gemini 3.8 Flash</strong></span>
+            <span class="ai-pill">データ修正・保守: <strong>Claude Opus 5.5</strong></span>
           </div>
         </div>
       </header>
@@ -438,7 +479,7 @@ import ResultBreakdown from '../components/ResultBreakdown.astro';
           </ul>
         </div>
         <div class="footer-ai-credit">
-          生成AI利用クレジット: 計画書作成 <strong>Gemini 4 Argon</strong> ｜ サイト作成 <strong>Gemini 3.8 Flash</strong>
+          生成AI利用クレジット: 計画書作成 <strong>Gemini 4 Argon</strong> ｜ サイト作成 <strong>Gemini 3.8 Flash</strong> ｜ データ修正・保守 <strong>Claude Opus 5.5</strong>
         </div>
         <div class="copyright">
           © 2026 生活保護費シミュレーター (Zero-Data Retention Architecture)
