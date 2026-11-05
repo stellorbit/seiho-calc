@@ -1,3 +1,4 @@
+/// <reference types="astro/client" />
 import { describe, it, expect } from 'vitest';
 import { calculateWelfare, getAgeCategory, mapDisabilityToCategory } from './calculator';
 import type { CalculationInput } from './types';
@@ -322,6 +323,28 @@ describe('生活扶助本体（世帯人員が多い場合・告示 別表第1 �
     expect(r6.livelihoodStandard.category2).toBe(38060);
     expect(r1.additions.winterAdditionEstimate).toBe(10590);
     expect(r6.additions.winterAdditionEstimate).toBe(10590);
+  });
+});
+
+describe('冬季加算の地区区分（告示 別表第1 第1章1(2)イ）', () => {
+  it('全都道府県の地区区分が告示の表と一致すること', () => {
+    const expected: Record<string, string[]> = {
+      I: ['北海道', '青森県', '秋田県'],
+      II: ['岩手県', '山形県', '新潟県'],
+      III: ['宮城県', '福島県', '富山県', '長野県'],
+      IV: ['石川県', '福井県'],
+      V: ['栃木県', '群馬県', '山梨県', '岐阜県', '鳥取県', '島根県'],
+    };
+    const zoneOf = (prefName: string) => Object.keys(expected).find((z) => expected[z].includes(prefName)) ?? 'VI';
+    const files = import.meta.glob<{ prefName: string; winterZone: string }>('../../public/data/municipalities/*.json', {
+      eager: true,
+      import: 'default',
+    });
+    const list = Object.values(files);
+    expect(list).toHaveLength(47);
+    for (const data of list) {
+      expect(data.winterZone, data.prefName).toBe(zoneOf(data.prefName));
+    }
   });
 });
 
